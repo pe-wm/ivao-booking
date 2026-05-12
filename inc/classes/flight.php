@@ -696,14 +696,12 @@ class Flight
 				$this->booked = 1;
 
 				if ($db->GetSQL()->query($query))
-					{					
+					{
 						if (!empty($u->email))
 						{
-							if ($this->SendConfirmationEmail() === 0)
-								return 0;
+							$this->SendConfirmationEmail();
 						}
-						else
-							return 0;
+						return 0;
 					}
 				}
 			}
@@ -755,14 +753,12 @@ class Flight
 				$this->booked = 2;
 
 				if ($db->GetSQL()->query($query))
-					{					
+					{
 						if (!empty($u->email))
 						{
-							if ($this->SendConfirmationEmail() === 0)
-								return 0;
+							$this->SendConfirmationEmail();
 						}
-						else
-							return 0;
+						return 0;
 					}
 				}
 			}

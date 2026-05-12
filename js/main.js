@@ -17,6 +17,15 @@ function notification(data)
 			confirmButtonText: "OK",
 		});
 	}
+	else if (data && data.message)
+	{
+		swal2({
+			title: "Error during the request!",
+			text: data.message,
+			type: "error",
+			confirmButtonText: "OK",
+		});
+	}
 	else
 	{
 		swal2({

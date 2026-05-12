@@ -197,6 +197,47 @@ class Session
 		return $_SESSION["xsrfToken"];
 	}
 
+	private static function JsonizeFlightResponse($error)
+	{
+		$response = ["error" => $error];
+		if ($error !== 0 && Session::LoggedIn() && Session::User()->permission > 1)
+		{
+			global $db;
+			$response["message"] = self::FlightErrorMessage($error, $db);
+		}
+		return json_encode($response);
+	}
+
+	private static function FlightErrorMessage($error, $db)
+	{
+		$adminMessage = "";
+		if (Session::LoggedIn() && Session::User()->permission > 1 && class_exists('Email') && Email::LastError())
+			$adminMessage = " SMTP error: " . Email::LastError();
+		switch ($error)
+		{
+			case 1:
+				return "The flight is no longer available for booking." . $adminMessage;
+			case 2:
+				return "A booking conflict has been detected. Conflicting flight(s) were found.";
+			case 403:
+				return "Permission denied for this action.";
+			case 404:
+				return "Flight not found.";
+			case 419:
+				return "Invalid or expired session token.";
+			case -1:
+				$detail = "Internal server error.";
+				if ($db && $db->GetSQL())
+					$detail .= " DB error: " . $db->GetSQL()->error;
+				return $detail . $adminMessage;
+			default:
+				$detail = "Unknown error code: " . $error;
+				if ($db && $db->GetSQL())
+					$detail .= " DB error: " . $db->GetSQL()->error;
+				return $detail . $adminMessage;
+		}
+	}
+
 	/**
 	 * Processes requests and acts accordingly
 	 * Called at main
@@ -256,29 +297,29 @@ class Session
 									global $config;
 									// Check if prebook mode is enabled in config
 									if (isset($config["prebook"]) && $config["prebook"] == "true")
-										echo json_encode(["error" => $f->Prebook()]);
+										echo self::JsonizeFlightResponse($f->Prebook());
 									else
-										echo json_encode(["error" => $f->Reserva()]);
+										echo self::JsonizeFlightResponse($f->Reserva());
 									break;
 								// confirm prebooked flight
 								case "confirm":
-									echo json_encode(["error" => $f->Book()]);
+									echo self::JsonizeFlightResponse($f->Book());
 									break;
 								// delete booking
 								case "free":
-									echo json_encode(["error" => $f->Free()]);
+									echo self::JsonizeFlightResponse($f->Free());
 									break;
 								// delete flight
 								case "delete":
-									echo json_encode(["error" => $f->Delete()]);
+									echo self::JsonizeFlightResponse($f->Delete());
 									break;
 								// modify flight
 								case "update":
-									echo json_encode(["error" => $f->Update($requestArray)]);
+									echo self::JsonizeFlightResponse($f->Update($requestArray));
 									break;
 								// resend confirmation email
 								case "sendconfirmation":
-									echo json_encode(["error" => $f->SendConfirmationEmail()]);
+									echo self::JsonizeFlightResponse($f->SendConfirmationEmail());
 									break;
 								default:
 									echo json_encode(["error" => -1]);

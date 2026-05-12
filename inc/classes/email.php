@@ -12,6 +12,8 @@
  */
 class Email
 {
+	private static $lastError = "";
+
 	/**
 	 * Sends email through donatus' SMTP API. (https://github.com/donatmarko/my-smtp-api)
 	 * @param mixed $from - name, email
@@ -161,8 +163,15 @@ class Email
         catch (Exception $e)
         {
             // error in SMTP process
+            self::$lastError = $cfg_smtp->ErrorInfo ? $cfg_smtp->ErrorInfo : $e->getMessage();
+            error_log("[booking.pe.ivao.aero] SMTP error: " . self::$lastError);
             return 2;
         }
+	}
+
+	public static function LastError()
+	{
+		return self::$lastError;
 	}
 
 	/**
