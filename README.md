@@ -1,8 +1,8 @@
 This project was first created by Donat Marko (IVAO VID 540147). But later abandonded.
 We've decided to continue its development and improve it somehow.
 Dependencies found may be not up to date or obsolete, as they were from 2020.
-PHPMailer and all its dependencies are not needed if not using SMTP. In the config-inc.php we set $config["mail_driver"] to 'api', so we use donatmarko/my-smtp-api.
-Google works fine for emailing using it's own generated passwords (not the one you use for login in)
+PHPMailer and all its dependencies are probably not needed.
+We're using google for emailing. All it's in the database config table, mail_smtp_* entries. Using smtp.google.com works fine.
 
 =========================================================================================
 
