@@ -1,4 +1,14 @@
+This project was first created by Donat Marko (IVAO VID 540147). But later abandonded.
+We've decided to continue its development and improve it somehow.
+Dependencies found may be not up to date or obsolete, as they were from 2020.
+PHPMailer and all its dependencies are not needed if not using SMTP. In the config-inc.php we set $config["mail_driver"] to 'api', so we use donatmarko/my-smtp-api.
+Google works fine for emailing using it's own generated passwords (not the one you use for login in)
+
+=========================================================================================
+
 When first login in the website, remember to update your permissions in the users table in the database so you can have access to the admin panel.
+
+=========================================================================================
 
 The Following is AI Generated, sorry.
 # IVAO Event Flight Booking System
