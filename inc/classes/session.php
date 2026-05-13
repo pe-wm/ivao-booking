@@ -524,6 +524,18 @@ class Session
 				if ($action == "importFlights") {
 					echo json_encode(["error" => Flight::ImportDatabase($requestArray)]);
 				}
+				if ($action == "exportSlots") {
+					echo json_encode(["error" => 0, "data" => Timeframe::ExportDatabase()]);
+				}
+				if ($action == "clearSlots") {
+					echo json_encode(["error" => Timeframe::ClearDatabase()]);
+				}
+				if ($action == "importSlots") {
+					echo json_encode(["error" => Timeframe::ImportDatabase($requestArray)]);
+				}
+				if ($action == "exportSlotsCSV") {
+					echo json_encode(["error" => 0, "data" => Timeframe::ExportCSV()]);
+				}
 				die();
 			}	
 

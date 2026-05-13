@@ -538,6 +538,31 @@ foreach ($flts as $flt)
 					</div>
 
 					<?php include_once("inc/modal_slot.php"); ?>
+					
+					<hr class="my-5">
+					
+					<div class="row">
+						<div class="col-md-6">
+							<div class="card mb-4">
+								<h5 class="card-header">Export private slots</h5>
+								<div class="card-body">
+									<p class="card-text">Export all timeframes and private slots from the database into a JSON or CSV file.</p>
+									<button class="btn btn-primary" onclick="adminExportSlots()">Export to JSON</button>
+									<button class="btn btn-info" onclick="adminExportSlotsCSV()">Export to CSV</button>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="card mb-4">
+								<h5 class="card-header">Import private slots</h5>
+								<div class="card-body">
+									<p class="card-text">Import timeframes and private slots from a JSON file.</p>
+									<input type="file" id="fileImportSlots" class="form-control-file mb-3" accept=".json">
+									<button class="btn btn-warning" onclick="adminImportSlots()">Import from JSON</button>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 
 				<div class="tab-pane fade" id="tabFlightMgmt" role="tabpanel">

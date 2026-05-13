@@ -925,3 +925,128 @@ function adminImportFlights() {
 	reader.readAsText(file);
 }
 
+function adminExportSlots() {
+	$.ajax({
+		cache: false,
+		type: "POST",
+		url: "json",
+		data: { "type": "admin", "action": "exportSlots" },
+		success: function (data) {
+			if (data && data.error == 0 && data.data) {
+				var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data.data, null, 2));
+				var downloadAnchorNode = document.createElement('a');
+				downloadAnchorNode.setAttribute("href", dataStr);
+				downloadAnchorNode.setAttribute("download", "slots_export.json");
+				document.body.appendChild(downloadAnchorNode);
+				downloadAnchorNode.click();
+				downloadAnchorNode.remove();
+			} else {
+				toast({
+					title: "Error exporting slots.",
+					type: "error",
+				});
+			}
+		}
+	});
+}
+
+function adminImportSlots() {
+	var fileInput = document.getElementById("fileImportSlots");
+	if (fileInput.files.length === 0) {
+		toast({ title: "Please select a JSON file first.", type: "warning" });
+		return;
+	}
+
+	var file = fileInput.files[0];
+	var reader = new FileReader();
+
+	reader.onload = function(e) {
+		var content = e.target.result;
+		try {
+			// Validate it's proper JSON
+			JSON.parse(content);
+			
+			var appendStr = "true";
+			var doImport = function() {
+				$.ajax({
+					cache: false,
+					type: "POST",
+					url: "json",
+					data: { "type": "admin", "action": "importSlots", "slots_json": content, "append": appendStr },
+					success: function (data) {
+						if (data && data.error == 0) {
+							toast({
+								title: "Slots imported successfully.",
+								type: "success",
+							});
+							fileInput.value = "";
+							aGetTimeframes(); // Refresh the list
+						} else {
+							toast({
+								title: "Error importing slots.",
+								type: "error",
+							});
+						}
+					}
+				});
+			};
+
+			swal2({
+				title: "Clear before import?",
+				text: "Do you want to clear the existing slots and timeframes before importing?",
+				type: "question",
+				showCancelButton: true,
+				confirmButtonText: "Yes, clear first",
+				cancelButtonText: "No, just append"
+			}).then((result) => {
+				if (result.value) {
+					// Yes, clear first
+					appendStr = "false";
+					swal2({
+						title: "Are you sure?",
+						text: "This will delete all current slots and timeframes before importing. Continue?",
+						type: "warning",
+						showCancelButton: true,
+						confirmButtonText: "Yes, clear and import"
+					}).then((clearResult) => {
+						if (clearResult.value) doImport();
+					});
+				} else if (result.dismiss === 'cancel' || (swal2.DismissReason && result.dismiss === swal2.DismissReason.cancel)) {
+					// No, just append
+					appendStr = "true";
+					doImport();
+				}
+			});
+			
+		} catch (e) {
+			toast({ title: "Invalid JSON file.", type: "error" });
+		}
+	};
+	reader.readAsText(file);
+}
+
+function adminExportSlotsCSV() {
+	$.ajax({
+		cache: false,
+		type: "POST",
+		url: "json",
+		data: { "type": "admin", "action": "exportSlotsCSV" },
+		success: function (data) {
+			if (data && data.error == 0 && data.data) {
+				var dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(data.data);
+				var downloadAnchorNode = document.createElement('a');
+				downloadAnchorNode.setAttribute("href", dataStr);
+				downloadAnchorNode.setAttribute("download", "slots_export.csv");
+				document.body.appendChild(downloadAnchorNode);
+				downloadAnchorNode.click();
+				downloadAnchorNode.remove();
+			} else {
+				toast({
+					title: "Error exporting slots to CSV.",
+					type: "error",
+				});
+			}
+		}
+	});
+}
+

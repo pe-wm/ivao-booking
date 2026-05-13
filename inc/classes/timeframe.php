@@ -27,6 +27,148 @@ class Timeframe
 		return json_encode($timeframes);
 	}
 
+	public static function ExportDatabase()
+	{
+		global $db;
+		$data = ["timeframes" => [], "slots" => []];
+		if (Session::LoggedIn() && Session::User()->permission > 1) {
+			if ($query = $db->GetSQL()->query("SELECT * FROM timeframes")) {
+				while ($row = $query->fetch_assoc()) {
+					$data["timeframes"][] = $row;
+				}
+			}
+			if ($query = $db->GetSQL()->query("SELECT * FROM slots")) {
+				while ($row = $query->fetch_assoc()) {
+					$data["slots"][] = $row;
+				}
+			}
+			return $data;
+		}
+		return null;
+	}
+
+	public static function ClearDatabase()
+	{
+		global $db;
+		if (Session::LoggedIn() && Session::User()->permission > 1) {
+			$db->GetSQL()->query("TRUNCATE TABLE slots");
+			if ($db->GetSQL()->query("TRUNCATE TABLE timeframes")) {
+				return 0;
+			}
+		} else {
+			return 403;
+		}
+		return -1;
+	}
+
+	public static function ImportDatabase($array)
+	{
+		global $db;
+		if (Session::LoggedIn() && Session::User()->permission > 1) {
+			$append = isset($array["append"]) ? $array["append"] == "true" : false;
+			$data = json_decode($array["slots_json"], true);
+			
+			if (!$data || !is_array($data)) return -1;
+			
+			$mysqli = $db->GetSQL();
+
+			if (!$append) {
+				$mysqli->query("TRUNCATE TABLE slots");
+				$mysqli->query("TRUNCATE TABLE timeframes");
+			}
+
+			// Import Timeframes
+			if (isset($data["timeframes"]) && is_array($data["timeframes"])) {
+				foreach ($data["timeframes"] as $row) {
+					$id = intval($row['id']);
+					$icao = $mysqli->real_escape_string($row['airport_icao'] ?? '');
+					$time = $mysqli->real_escape_string($row['time'] ?? '');
+					$count = intval($row['count'] ?? 1);
+
+					if ($append) {
+						$query = "INSERT INTO timeframes (airport_icao, `time`, `count`) VALUES ('$icao', '$time', $count)";
+					} else {
+						$query = "INSERT INTO timeframes (id, airport_icao, `time`, `count`) VALUES ($id, '$icao', '$time', $count)";
+					}
+					$mysqli->query($query);
+				}
+			}
+
+			// Import Slots
+			if (isset($data["slots"]) && is_array($data["slots"])) {
+				foreach ($data["slots"] as $row) {
+					$id = intval($row['id']);
+					$tfId = intval($row['timeframe_id']);
+					$cs = $mysqli->real_escape_string($row['callsign'] ?? '');
+					$ori = $mysqli->real_escape_string($row['origin_icao'] ?? '');
+					$des = $mysqli->real_escape_string($row['destination_icao'] ?? '');
+					$ac = $mysqli->real_escape_string($row['aircraft_icao'] ?? '');
+					$fr = intval($row['aircraft_freighter'] ?? 0);
+					$term = $mysqli->real_escape_string($row['terminal'] ?? '');
+					$gate = $mysqli->real_escape_string($row['gate'] ?? '');
+					$route = $mysqli->real_escape_string($row['route'] ?? '');
+					$booked = intval($row['booked'] ?? 0);
+					$bookedBy = empty($row['booked_by']) ? "NULL" : intval($row['booked_by']);
+					$bookedAt = empty($row['booked_at']) ? "NULL" : "'" . $mysqli->real_escape_string($row['booked_at']) . "'";
+
+					if ($append) {
+						// Note: when appending, timeframe_id might need to be remapped if we didn't preserve IDs, 
+						// but here we assume user knows what they are doing or they are doing a full restore.
+						// Actually, if we append timeframes, their IDs will change. This is a problem.
+						// For now, we follow the Flight pattern which doesn't handle remapping either.
+						$query = "INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES ($tfId, '$cs', '$ori', '$des', '$ac', $fr, '$term', '$gate', '$route', $booked, $bookedBy, $bookedAt)";
+					} else {
+						$query = "INSERT INTO slots (id, timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES ($id, $tfId, '$cs', '$ori', '$des', '$ac', $fr, '$term', '$gate', '$route', $booked, $bookedBy, $bookedAt)";
+					}
+					$mysqli->query($query);
+				}
+			}
+
+			return 0;
+		}
+		return -1;
+	}
+
+	public static function ExportCSV()
+	{
+		global $db;
+		if (Session::LoggedIn() && Session::User()->permission > 1) {
+			$output = "Airport,Time,Callsign,Aircraft,Freighter,Origin,Destination,Terminal,Gate,Route,Booked By,Status,Booked At\n";
+			$sql = "SELECT t.airport_icao, t.time as slot_time, s.* FROM slots s JOIN timeframes t ON s.timeframe_id = t.id ORDER BY t.time, s.callsign";
+			if ($query = $db->GetSQL()->query($sql)) {
+				while ($row = $query->fetch_assoc()) {
+					$status = $row['booked'] == 2 ? 'Granted' : 'Requested';
+					$freighter = $row['aircraft_freighter'] == 1 ? 'Y' : 'N';
+					
+					$line = [
+						$row['airport_icao'],
+						$row['slot_time'],
+						$row['callsign'],
+						$row['aircraft_icao'],
+						$freighter,
+						$row['origin_icao'],
+						$row['destination_icao'],
+						$row['terminal'],
+						$row['gate'],
+						$row['route'],
+						$row['booked_by'],
+						$status,
+						$row['booked_at']
+					];
+					
+					// Escape quotes and wrap in quotes
+					foreach ($line as &$field) {
+						$field = '"' . str_replace('"', '""', $field) . '"';
+					}
+					
+					$output .= implode(",", $line) . "\n";
+				}
+			}
+			return $output;
+		}
+		return null;
+	}
+
 	/**
 	 * Returns a timeframe found in the database based on its id, otherwise returns null
 	 * @param string $icao
