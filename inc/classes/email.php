@@ -212,21 +212,22 @@ class Email
 			$message = "<p>" . nl2br(htmlspecialchars($array["message"])) . "</p><p>--<br>" . $fullname . " (" . $user->vid . ")<br>Division: " . $user->division . "<br>" . $email . "</p>";
 			$result = false;
 
+			// To: staff inbox (mail_smtp_username); Sender user info is included in the message body
 			if ($config["mail_driver"] == "api")
 				$result = Email::SendApi(
 					["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-					["name" => $fullname, "email" => $email],
+					["name" => $config["mail_from_name"], "email" => $config["mail_smtp_username"]],
 					null,
-					$config["division_email"],
+					null,
 					$subject,
 					$message
 				);
 			if ($config["mail_driver"] == "smtp")
 				$result = Email::SendSmtp(
 					["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-					["name" => $fullname, "email" => $email],
+					["name" => $config["mail_from_name"], "email" => $config["mail_smtp_username"]],
 					null,
-					$config["division_email"],
+					null,
 					$subject,
 					$message
 				);
