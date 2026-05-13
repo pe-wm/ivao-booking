@@ -46,6 +46,7 @@ foreach ($flts as $flt)
 				<a class="nav-link" id="tabNewFlightLink" data-toggle="pill" href="#tabNewFlight" role="tab">Add new flight</a>
 				<a class="nav-link" id="tabTimeframesLink" data-toggle="pill" href="#tabTimeframes" role="tab">Private slot management</a>				
 				<a class="nav-link" id="tabFlightMgmtLink" data-toggle="pill" href="#tabFlightMgmt" role="tab">Flight management</a>
+				<a class="nav-link" id="tabFlightListLink" data-toggle="pill" href="#tabFlightList" role="tab">Flight list</a>
 			</div>
 		</div> 
 
@@ -594,6 +595,30 @@ foreach ($flts as $flt)
 						</div>
 					</div>
 					*/ ?>
+				</div>
+				
+				<div class="tab-pane fade" id="tabFlightList" role="tabpanel">
+					<h2>Flight list (<?=count($flts)?>)</h2>
+					<div class="list-group">
+						<?php
+						foreach ($flts as $f)
+						{
+							$airline = $f->getAirline();
+							echo '<a href="javascript:void(0)" class="list-group-item list-group-item-action" onclick="getFlight(' . $f->id . ')">';
+							echo ($airline ? $airline->getLogo() : "") . '<strong>' . $f->callsign . '</strong> ' . $f->departureTime . ' – <strong>' . $f->originIcao . ' - ' . $f->destinationIcao. '</strong> - ' . $f->arrivalTime;
+							echo '<span class="float-right">';
+
+							if ($f->booked == "prebooked")
+								echo '<span class="badge badge-warning">Prebooked</span>';
+							elseif ($f->booked == "booked")
+								echo '<span class="badge badge-danger">Booked</span>';
+							else
+								echo '<span class="badge badge-success">Free</span>';
+								
+							echo '</span></a>';
+						}
+						?>
+					</div>
 				</div>
 
 				<div class="tab-pane fade" id="tabEmail" role="tabpanel">
