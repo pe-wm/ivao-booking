@@ -75,6 +75,9 @@ $prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";
 							<div class="col-lg-8">
 								<div class="head">Route <span id="fltGcd"></span></div>
 								<div id="fltRoute" style="font-family: Consolas, 'Ubuntu Mono', 'Courier New', courier"></div>
+								<p class="mt-2">
+									<a href="https://www.simbrief.com/system/dispatch.php" target="_blank" class="btn btn-secondary btn-sm" id="btnSimbrief">SimBrief</a>									
+								</p>
 							</div>
 						</div>
 					</div>
@@ -98,7 +101,6 @@ $prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";
 							<div id="fltWxResult" class="card card-body wxResult"></div>
 <?php endif; ?>
 							<p>
-								<a href="https://www.simbrief.com/system/dispatch.php?newflight=1" target="_blank" class="btn btn-secondary btn-sm">SimBrief</a>
 								<a href="http://rfinder.asalink.net/free" target="_blank" class="btn btn-secondary btn-sm">RouteFinder</a>
 							</p>
 						</div>

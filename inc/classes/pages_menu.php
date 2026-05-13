@@ -158,7 +158,7 @@ class Pages
 	{
 		$result = "";
 		foreach (self::$scripts as $script)
-            echo '<script type="text/javascript" src="' . $script . '?v=42"></script>';
+            echo '<script type="text/javascript" src="' . $script . '?v=44"></script>';
 
 		if (!empty(Pages::$js))
 			$result .= '<script>' . Pages::$js . '</script>';

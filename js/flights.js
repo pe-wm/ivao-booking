@@ -1,7 +1,7 @@
-$(document).ready(function() {
-	$.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+$(document).ready(function () {
+	$.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
 		var checked = $('#fltOnlyFree').is(':checked');
-		
+
 		if (checked && aData[6] == "free")
 			return true;
 		if (!checked)
@@ -10,74 +10,69 @@ $(document).ready(function() {
 	});
 
 	var dataTables = [];
-	$(".tblFlights").each(function() {
+	$(".tblFlights").each(function () {
 		var tbl = $(this).dataTable({
 			"destroy": true,  // Permite reinicializar si ya existe
 			"responsive": true,
 			"autoWidth": false,      // NO calcular anchos automáticos
-            "bAutoWidth": false,
+			"bAutoWidth": false,
 			"pageLength": 100,
 			"language": {
-				"info":           "Showing _START_ to _END_ of _TOTAL_ flights",
-				"infoEmpty":      "Showing 0 to 0 of 0 flights",
-				"infoFiltered":   "(filtered from _MAX_ total flights)",
-				"lengthMenu":     "Show _MENU_ flights",
-				"zeroRecords":    "No matching flights found",
+				"info": "Showing _START_ to _END_ of _TOTAL_ flights",
+				"infoEmpty": "Showing 0 to 0 of 0 flights",
+				"infoFiltered": "(filtered from _MAX_ total flights)",
+				"lengthMenu": "Show _MENU_ flights",
+				"zeroRecords": "No matching flights found",
 			},
-			"order": [[ 3, "asc" ]]
+			"order": [[3, "asc"]]
 		});
 		dataTables.push(tbl);
 	});
 
-	$('#fltOnlyFree').on("click", function(e) {
-		$.each(dataTables, function(index, item) {
+	$('#fltOnlyFree').on("click", function (e) {
+		$.each(dataTables, function (index, item) {
 			item.fnDraw();
 		});
 	});
 });
 
-function getFlight(id)
-{
+function getFlight(id) {
 	$.ajax({
 		cache: false,
 		url: "json",
 		type: "POST",
-		data: { "type": "flights", "id": id	},
-		success: function(data) {
+		data: { "type": "flights", "id": id },
+		success: function (data) {
 			$("#uiFltMap").html("<div id='leafletFltMap' style='width: 100%; height: 100%'></div>");
 			var map = L.map('leafletFltMap').setView([51.505, -0.09], 13);
 			map.scrollWheelZoom.disable();
 			L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
 				maxZoom: 18,
- 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-			}).addTo(map);	
-			
-			$("#fltMap").on('shown.bs.collapse', function(e) { map.invalidateSize(true); map.fitBounds(polyline.getBounds()); });
-			$("#flight").on('shown.bs.modal', function(e) { map.invalidateSize(true); map.fitBounds(polyline.getBounds()); });
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+			}).addTo(map);
 
-			if (data.airline)
-			{
+			$("#fltMap").on('shown.bs.collapse', function (e) { map.invalidateSize(true); map.fitBounds(polyline.getBounds()); });
+			$("#flight").on('shown.bs.modal', function (e) { map.invalidateSize(true); map.fitBounds(polyline.getBounds()); });
+
+			if (data.airline) {
 				$("#fltTitle").html(data.airline.logo + data.airline.name + " flight " + data.flightNumber);
 				$("#fltRadioCallsignHuman").html('"' + data.airline.callsign + '"');
 			}
-			else
-			{
+			else {
 				$("#fltTitle").html("Flight " + data.flightNumber);
 				$("#fltRadioCallsignHuman").html(null);
 			}
 			$("#fltRadioCallsign").html(data.callsign);
-			
-			if (data.originAirport)
-			{
+
+			if (data.originAirport) {
 				$("#fltOriginIcao").html(data.originAirport.countryFlag32 + data.originAirport.icao);
 				$("#fltOriginHuman").html(data.originAirport.name);
 				L.marker([data.originAirport.latitude, data.originAirport.longitude]).addTo(map).bindPopup("<b>" + data.originIcao + "</b><br>" + data.originAirport.name);
 			}
 			else
 				$("#fltOriginIcao").html(data.originIcao);
-			
-			if (data.destinationAirport)
-			{
+
+			if (data.destinationAirport) {
 				$("#fltDestinationIcao").html(data.destinationAirport.countryFlag32 + data.destinationAirport.icao);
 				$("#fltDestinationHuman").html(data.destinationAirport.name);
 				L.marker([data.destinationAirport.latitude, data.destinationAirport.longitude]).addTo(map).bindPopup("<b>" + data.destinationIcao + "</b><br>" + data.destinationAirport.name);
@@ -85,17 +80,15 @@ function getFlight(id)
 			else
 				$("#fltDestinationIcao").html(data.destinationIcao);
 
-			if (data.originAirport && data.destinationAirport)
-			{
+			if (data.originAirport && data.destinationAirport) {
 				$("#fltGcd").html("- <i>Great circle distance: <b>" + Number(data.greatCircleDistanceNm.toFixed(1)) + " nm</b></i>");
 
-				if (!(data.originAirport.latitude == data.destinationAirport.latitude && data.originAirport.longitude == data.destinationAirport.longitude))
-				{
+				if (!(data.originAirport.latitude == data.destinationAirport.latitude && data.originAirport.longitude == data.destinationAirport.longitude)) {
 					var polyline = L.Polyline.Arc([data.originAirport.latitude, data.originAirport.longitude], [data.destinationAirport.latitude, data.destinationAirport.longitude], { color: 'red', vertices: 200 }).addTo(map);
-					map.fitBounds(polyline.getBounds());				
+					map.fitBounds(polyline.getBounds());
 				}
 			}
-			
+
 			$("#fltAircraftIcao").html(data.aircraftIcao);
 			$("#fltAircraftHuman").html(data.aircraftName);
 			$("#fltPosition").html(data.position);
@@ -112,21 +105,18 @@ function getFlight(id)
 				$("#fltDepartureTimeAuto").show();
 			else
 				$("#fltDepartureTimeAuto").hide();
-			
-			if (data.sessionUser)
-			{
+
+			if (data.sessionUser) {
 				$("#fltBtnsLoggedOut").hide();
 				$("#fltBtnsDefault").show();
 			}
-			else
-			{
+			else {
 				$("#fltBtnsLoggedOut").show();
 				$("#fltBtnsDefault").hide();
 			}
 
 			$("#fltEdit").collapse("hide");
-			if (data.sessionUser && data.sessionUser.permission > 1)
-			{
+			if (data.sessionUser && data.sessionUser.permission > 1) {
 				$("#fltBtnsAdmin").show();
 				$("#btnFltAdminDelete").attr("onclick", "deleteFlight(" + data.id + ")");
 				$("#fltId").val(data.id);
@@ -138,61 +128,56 @@ function getFlight(id)
 				$("#chkFltFreighter").prop("checked", data.aircraftFreighter);
 				$("#txtFltTerminal").val(data.terminal);
 				$("#txtFltGate").val(data.gate);
-				$("#txtFltRoute").val(data.route);	
+				$("#txtFltRoute").val(data.route);
 				$("#dtpFltDeparture").datetimepicker("date", moment(data.departureTime));
 				$("#dtpFltArrival").datetimepicker("date", moment(data.arrivalTime));
 				$("#chkFltDepartureAuto").prop("checked", data.isDepartureEstimated).trigger("change");
 				$("#chkFltArrivalAuto").prop("checked", data.isArrivalEstimated).trigger("change");
 
-				if (data.booked == "free")
-				{
+				if (data.booked == "free") {
 					$("#selFltStatus").val(0);
 					$("#numFltBookedBy").val(null);
 				}
-				if (data.booked == "prebooked")
-				{
+				if (data.booked == "prebooked") {
 					$("#selFltStatus").val(1);
 					$("#numFltBookedBy").val(data.bookedBy);
 				}
-				if (data.booked == "booked")
-				{
+				if (data.booked == "booked") {
 					$("#selFltStatus").val(2);
 					$("#numFltBookedBy").val(data.bookedBy);
 				}
 				$("#selFltStatus").trigger("change");
 			}
-			else
-			{
+			else {
 				$("#fltBtnsAdmin").hide();
 				$("#fltEdit").html(null);
 			}
 
 			$("#fltBtnsConfirm").hide();
-			if (data.booked == "free")
-			{
+			if (data.booked == "free") {
 				var isPrebook = $("#flight").attr("data-prebook-mode") === "true";
-				
+
 				$("#fltInfobox").html("This flight is available for booking!")
 					.attr("class", "alert alert-success");
 				$("#fltBookedBy").hide();
-				
+
 				// Change button text based on prebook mode
 				if (isPrebook) {
 					$("#btnFltBook").text("Pre-book this flight!");
 				} else {
 					$("#btnFltBook").text("Book this flight now!");
 				}
-				
-				$("#btnFltBook").show();					
+
+				$("#btnFltBook").show();
 				$("#btnFltFree").hide();
 				$("#btnFltConfirmPrebook").hide();
 				$("#btnFltBriefing").hide();
-				$("#btnFltSendEmail").hide();				
-				
-				$("#btnFltBook").click(function() {
+				$("#btnFltSendEmail").hide();
+
+				$("#btnFltBook").click(function () {
 					$("#fltBtnsDefault").hide();
 					$("#fltBtnsConfirm").show();
-					
+
 					if (isPrebook) {
 						$("#fltInfobox").attr("class", "alert alert-warning")
 							.html("<p>Please <strong>pre-book only</strong> if you have real intentions to accomplish this flight!</p><p>You will need to <strong>confirm your booking</strong> once you are sure you can fly it.</p><p>Don't abuse the event with booking flights just to block them from other members! Thank you.</p>");
@@ -202,19 +187,16 @@ function getFlight(id)
 							.html("<p>Please book <strong>only</strong> if you have real intentions to accomplish this flight!</p><p>Don't abuse the event with booking flights just to block them from other members! Thank you.</p>");
 						$("#btnFltConfirm").text("I agree, book the flight");
 					}
-					
+
 					$("#btnFltConfirm").attr("onclick", "bookFlight(" + id + ")");
 				});
 			}
-			else
-			{
-				if (data.booked == "prebooked")
-				{
+			else {
+				if (data.booked == "prebooked") {
 					$("#fltInfobox").html("This flight has been prebooked.")
 						.attr("class", "alert alert-warning")
 				}
-				if (data.booked == "booked")
-				{
+				if (data.booked == "booked") {
 					$("#fltInfobox").html("This flight has already been booked.")
 						.attr("class", "alert alert-danger")
 				}
@@ -229,26 +211,22 @@ function getFlight(id)
 				$("#btnFltBook").hide();
 				$("#btnFltConfirmPrebook").hide();
 
-				if (data.sessionUser && (data.sessionUser.vid == data.bookedByUser.vid || data.sessionUser.permission >= 2))
-				{
+				if (data.sessionUser && (data.sessionUser.vid == data.bookedByUser.vid || data.sessionUser.permission >= 2)) {
 					$("#btnFltFree").show()
 						.attr("onclick", "freeFlight(" + id + ")");
 
 					// Show confirm button if flight is prebooked and user is the booker
-					if (data.booked == "prebooked" && data.sessionUser.vid == data.bookedByUser.vid)
-					{
+					if (data.booked == "prebooked" && data.sessionUser.vid == data.bookedByUser.vid) {
 						$("#btnFltConfirmPrebook").show()
 							.attr("onclick", "confirmPrebooking(" + id + ")");
 					}
 
-					if (data.booked == "prebooked" && data.bookedByUser.emailGiven)
-					{
+					if (data.booked == "prebooked" && data.bookedByUser.emailGiven) {
 						$("#btnFltSendEmail").attr("onclick", "sendEmailFlight(" + id + ")")
 							.show();
 					}
 				}
-				else
-				{
+				else {
 					$("#btnFltFree").hide();
 					$("#btnFltConfirmPrebook").hide();
 				}
@@ -256,14 +234,12 @@ function getFlight(id)
 
 			// turnover flights
 			$("#fltTurnovers").collapse("hide");
-			if (data.turnoverFlights.length > 0)
-			{
+			if (data.turnoverFlights.length > 0) {
 				var content = '<div class="list-group">';
-				$.each(data.turnoverFlights, function() {
+				$.each(data.turnoverFlights, function () {
 					content += '<a href="javascript:void(0)" class="list-group-item list-group-item-action" onclick="getFlight(' + this.id + ')">';
 					content += (this.airline ? this.airline.logo : "") + '<strong>' + this.callsign + '</strong> ' + this.originIcao + ' – ' + this.destinationIcao + '<span class="float-right">';
-					switch (this.booked)
-					{
+					switch (this.booked) {
 						case 'free':
 							content += '<span class="badge badge-success">Free</span>';
 							break;
@@ -284,8 +260,7 @@ function getFlight(id)
 				$("#btnFltTurnovers").hide();
 
 			// show flight briefing only when logged in to admins, or if we're the bookers
-			if (data.sessionUser && ((data.bookedByUser && data.bookedByUser.vid == data.sessionUser.vid) || (data.sessionUser.permission >= 2)))
-			{
+			if (data.sessionUser && ((data.bookedByUser && data.bookedByUser.vid == data.sessionUser.vid) || (data.sessionUser.permission >= 2))) {
 				$("#btnFltBriefing").show();
 				$("#fltMetarOrigin").html("METAR " + data.originIcao)
 					.attr("onclick", "getWx('#fltWxResult', 'json', { type: 'wx', icao: '" + data.originIcao + "' })");
@@ -300,23 +275,36 @@ function getFlight(id)
 			else
 				$("#btnFltBriefing").hide();
 
+			// SimBrief link update
+			var sbUrl = "https://www.simbrief.com/system/dispatch.php";
+			sbUrl += "?callsign=" + data.callsign;
+			sbUrl += "&orig=" + data.originIcao;
+			sbUrl += "&dest=" + data.destinationIcao;
+			sbUrl += "&type=" + data.aircraftIcao;
+
+			if (data.departureTime) {
+				var depMoment = moment(data.departureTime);
+				sbUrl += "&date=" + depMoment.format("DDMMMYY").toUpperCase();
+				sbUrl += "&deph=" + depMoment.format("HH");
+				sbUrl += "&depm=" + depMoment.format("mm");
+			}
+			$("#btnSimbrief").attr("href", sbUrl);
+
 			$("#flight").modal("show");
 		}
 	});
 }
 
-function bookFlight(id)
-{
+function bookFlight(id) {
 	var isPrebook = $("#flight").attr("data-prebook-mode") === "true";
-	
+
 	$.ajax({
 		cache: false,
 		type: "POST",
 		url: "json",
 		data: { "type": "flights", "id": id, "action": "book" },
-		success: function(data) {
-			if (data && data.error == 0)
-			{
+		success: function (data) {
+			if (data && data.error == 0) {
 				if (isPrebook) {
 					swal2({
 						title: "Flight has been pre-booked!",
@@ -335,17 +323,15 @@ function bookFlight(id)
 					}).then((value) => { $("#flight").modal("hide"); window.location.reload(); });
 				}
 			}
-			else if (data && data.error == 1)
-			{
+			else if (data && data.error == 1) {
 				swal2({
 					title: "Someone else was faster :-(",
 					text: "A member already booked this flight. You'll be redirected back to the flight list to look for an other one!",
 					type: "error",
 					confirmButtonText: "OK",
-				}).then((value) => {  window.location.reload(); });
+				}).then((value) => { window.location.reload(); });
 			}
-			else if (data && data.error == 2)
-			{
+			else if (data && data.error == 2) {
 				swal2({
 					title: "You have an other booked flight in this interval!",
 					html: "If you rather wish to book the present flight, please delete the previous reservation!<br>Conflicting flight(s): " + data.callsigns,
@@ -356,11 +342,10 @@ function bookFlight(id)
 			else
 				notification(data);
 		},
-	});	
+	});
 }
 
-function confirmPrebooking(id)
-{
+function confirmPrebooking(id) {
 	swal2({
 		title: "Confirm your pre-booking",
 		text: "Do you confirm that you will fly this flight? This action will convert your pre-booking to a confirmed booking.",
@@ -368,18 +353,15 @@ function confirmPrebooking(id)
 		showCancelButton: true,
 		cancelButtonText: "Not yet",
 		confirmButtonText: "Yes, confirm it!"
-	}).then((result) =>
-	{
-		if (result.value)
-		{
+	}).then((result) => {
+		if (result.value) {
 			$.ajax({
 				cache: false,
 				type: "POST",
 				url: "json",
 				data: { "type": "flights", "id": id, "action": "confirm" },
-				success: function(data) {
-					if (data && data.error == 0)
-					{
+				success: function (data) {
+					if (data && data.error == 0) {
 						swal2({
 							title: "Flight booking has been confirmed!",
 							text: "We're waiting for you on the event!",
@@ -388,8 +370,7 @@ function confirmPrebooking(id)
 							timer: 5000,
 						}).then(() => { $("#flight").modal("hide"); window.location.reload(); });
 					}
-					else if (data && data.error == 403)
-					{
+					else if (data && data.error == 403) {
 						swal2({
 							title: "You have no access to confirm the booking!",
 							text: "If you are logged in with other VID than the original booker, please log out!",
@@ -397,8 +378,7 @@ function confirmPrebooking(id)
 							confirmButtonText: "OK",
 						}).then(() => { $("#flight").modal("hide"); });
 					}
-					else
-					{
+					else {
 						swal2({
 							title: "Error while confirming the flight!",
 							text: "An unknown error has happened during the process. Please try again!",
@@ -407,13 +387,12 @@ function confirmPrebooking(id)
 						}).then(() => { $("#flight").modal("hide"); });
 					}
 				},
-			});	
+			});
 		}
 	});
 }
 
-function freeFlight(id)
-{
+function freeFlight(id) {
 	swal2({
 		title: "Are you sure you want to delete this booking?",
 		text: "Well, you can book again (as far as it's available) but it's a habit to ask for confirmation.",
@@ -421,18 +400,15 @@ function freeFlight(id)
 		showCancelButton: true,
 		cancelButtonText: "No, don't delete",
 		confirmButtonText: "Yes, delete it"
-	}).then((result) =>
-	{
-		if (result.value)
-		{
+	}).then((result) => {
+		if (result.value) {
 			$.ajax({
 				cache: false,
 				type: "POST",
 				url: "json",
 				data: { "type": "flights", "id": id, "action": "free" },
-				success: function(data) {
-					if (data && data.error == 0)
-					{
+				success: function (data) {
+					if (data && data.error == 0) {
 						swal2({
 							title: "Booking has been deleted!",
 							text: "Thank you for giving chance to the others to fly this flight :-)",
@@ -441,8 +417,7 @@ function freeFlight(id)
 							timer: 3000,
 						}).then(() => { $("#flight").modal("hide"); window.location.reload(); });
 					}
-					else
-					{
+					else {
 						swal2({
 							title: "Error while deleting the booking!",
 							text: "No idea what has happened. Please notify the staff to delete the booking manually. Page will be reloaded.",
@@ -451,31 +426,27 @@ function freeFlight(id)
 						}).then(() => { $("#flight").modal("hide"); window.location.reload(); });
 					}
 				},
-			});	
+			});
 		}
 	});
 }
 
-function deleteFlight(id)
-{
+function deleteFlight(id) {
 	swal2({
 		title: "Are you sure you want to delete this flight?",
 		type: "warning",
 		showCancelButton: true,
 		cancelButtonText: "No, don't delete",
 		confirmButtonText: "Yes, delete it"
-	}).then((result) =>
-	{		
-		if (result.value)
-		{
+	}).then((result) => {
+		if (result.value) {
 			$.ajax({
 				cache: false,
 				type: "POST",
 				url: "json",
 				data: { "type": "flights", "id": id, "action": "delete" },
-				success: function(data) {
-					if (data && data.error == 0)
-					{
+				success: function (data) {
+					if (data && data.error == 0) {
 						toast({
 							title: "Flight has been deleted!",
 							type: "success",
@@ -486,30 +457,29 @@ function deleteFlight(id)
 					else
 						notification(data);
 				},
-			});	
+			});
 		}
 	});
 }
 
-function sendEmailFlight(id)
-{
+function sendEmailFlight(id) {
 	// $.ajax({
-		// cache: false,
-		// type: "POST",
-		// url: "json",
-		// data: { "type": "flights", "id": id, "action": "sendconfirmation" },
-		// success: function(data) {
-			// if (data && data.error == 0)
-			// {
-				// toast({
-					// title: "Confirmation mail has been re-sent!",
-					// type: "success",
-				// });
-				// $("#flight").modal("hide");
-			// }
-			// else
-				// notification(data);
-		// },
+	// cache: false,
+	// type: "POST",
+	// url: "json",
+	// data: { "type": "flights", "id": id, "action": "sendconfirmation" },
+	// success: function(data) {
+	// if (data && data.error == 0)
+	// {
+	// toast({
+	// title: "Confirmation mail has been re-sent!",
+	// type: "success",
+	// });
+	// $("#flight").modal("hide");
+	// }
+	// else
+	// notification(data);
+	// },
 	// });	
 	toast({
 		title: "Confirmation mail has been re-sent!",
@@ -518,14 +488,14 @@ function sendEmailFlight(id)
 	$("#flight").modal("hide");
 }
 
-$("#btnFltAdminEdit").click(function() {
+$("#btnFltAdminEdit").click(function () {
 	$("#fltEdit").collapse("show");
 });
 
-$("#chkFltArrivalAuto").on("change", function() {
+$("#chkFltArrivalAuto").on("change", function () {
 	$("#dtpFltArrival input").prop("disabled", $(this).is(":checked"));
 });
 
-$("#chkFltDepartureAuto").on("change", function() {
+$("#chkFltDepartureAuto").on("change", function () {
 	$("#dtpFltDeparture input").prop("disabled", $(this).is(":checked"));
 });
