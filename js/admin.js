@@ -241,7 +241,14 @@ function aGetUsers() {
 
 				content += '</tr>';
 			}
+			if ($.fn.DataTable.isDataTable("#tblUsers")) {
+				$("#tblUsers").DataTable().destroy();
+			}
 			$("#tblUsers").find("tbody").html(content);
+			$("#tblUsers").DataTable({
+				"pageLength": 25,
+				"stateSave": true
+			});
 		}
 	});
 }
@@ -918,18 +925,3 @@ function adminImportFlights() {
 	reader.readAsText(file);
 }
 
-// User Filter
-$("#txtUserFilter").on("keyup", function() {
-	var value = $(this).val().toLowerCase();
-	$("#tblUsers tbody tr").filter(function() {
-		var vid = $(this).find("td:eq(0)").text().toLowerCase();
-		var name = $(this).find("td:eq(1)").text().toLowerCase();
-		var email = $(this).find("td:eq(3)").text().toLowerCase();
-		
-		$(this).toggle(
-			vid.indexOf(value) > -1 || 
-			name.indexOf(value) > -1 || 
-			email.indexOf(value) > -1
-		);
-	});
-});

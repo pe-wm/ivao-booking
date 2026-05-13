@@ -383,12 +383,6 @@ foreach ($flts as $flt)
 						</div>
 					</div>
 
-					<div class="row mb-2">
-						<div class="col-md-4">
-							<input type="text" id="txtUserFilter" class="form-control form-control-sm" placeholder="Filter by VID, Name or Email...">
-						</div>
-					</div>
-
 					<div class="table-responsive">
 						<table class="table table-hover table-sm table-striped" id="tblUsers">
 							<thead>
