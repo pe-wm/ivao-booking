@@ -34,6 +34,10 @@ $(document).ready(function () {
 			item.fnDraw();
 		});
 	});
+
+	$(document).on("click", "#btnFltPrint", function() {
+		window.print();
+	});
 });
 
 function getFlight(id) {
@@ -56,29 +60,36 @@ function getFlight(id) {
 
 			if (data.airline) {
 				$("#fltTitle").html(data.airline.logo + data.airline.name + " flight " + data.flightNumber);
-				$("#fltRadioCallsignHuman").html('"' + data.airline.callsign + '"');
+				$("#fltPassLogo").html(data.airline.logo);
+				$("#fltPassAirlineName").html(data.airline.name);
 			}
 			else {
 				$("#fltTitle").html("Flight " + data.flightNumber);
-				$("#fltRadioCallsignHuman").html(null);
+				$("#fltPassLogo").html("");
+				$("#fltPassAirlineName").html("IVAO");
 			}
-			$("#fltRadioCallsign").html(data.callsign);
+			
+			$("#fltPassCallsign, #fltStubCallsign").html(data.callsign);
+			$("#fltPassCallsignHuman").html(data.airline ? '"' + data.airline.callsign + '"' : "");
+
+			$("#fltPassOriginIcao").html(data.originIcao);
+			$("#fltPassDestinationIcao").html(data.destinationIcao);
+			$("#fltPassOriginHuman").html(data.originAirport ? data.originAirport.name : "");
+			$("#fltPassDestinationHuman").html(data.destinationAirport ? data.destinationAirport.name : "");
+
+			if (data.bookedByUser) {
+				$("#fltPassPassengerName, #fltStubPassengerName").html(data.bookedByUser.fullname);
+			} else {
+				$("#fltPassPassengerName, #fltStubPassengerName").html("AVAILABLE");
+			}
 
 			if (data.originAirport) {
-				$("#fltOriginIcao").html(data.originAirport.countryFlag32 + data.originAirport.icao);
-				$("#fltOriginHuman").html(data.originAirport.name);
 				L.marker([data.originAirport.latitude, data.originAirport.longitude]).addTo(map).bindPopup("<b>" + data.originIcao + "</b><br>" + data.originAirport.name);
 			}
-			else
-				$("#fltOriginIcao").html(data.originIcao);
 
 			if (data.destinationAirport) {
-				$("#fltDestinationIcao").html(data.destinationAirport.countryFlag32 + data.destinationAirport.icao);
-				$("#fltDestinationHuman").html(data.destinationAirport.name);
 				L.marker([data.destinationAirport.latitude, data.destinationAirport.longitude]).addTo(map).bindPopup("<b>" + data.destinationIcao + "</b><br>" + data.destinationAirport.name);
 			}
-			else
-				$("#fltDestinationIcao").html(data.destinationIcao);
 
 			if (data.originAirport && data.destinationAirport) {
 				$("#fltGcd").html("- <i>Great circle distance: <b>" + Number(data.greatCircleDistanceNm.toFixed(1)) + " nm</b></i>");
@@ -89,22 +100,12 @@ function getFlight(id) {
 				}
 			}
 
-			$("#fltAircraftIcao").html(data.aircraftIcao);
-			$("#fltAircraftHuman").html(data.aircraftName);
-			$("#fltPosition").html(data.position);
+			$("#fltPassAircraftIcao").html(data.aircraftIcao);
+			$("#fltPassPosition").html(data.position);
 			$("#fltRoute").html(data.route);
-			$("#fltDepartureTimeHuman").html(data.departureTimeHuman);
-			$("#fltArrivalTimeHuman").html(data.arrivalTimeHuman);
+			$("#fltPassDepartureTime, #fltStubDepartureTime").html(data.departureTimeHuman);
+			$("#fltPassArrivalTime").html(data.arrivalTimeHuman);
 
-			if (data.isArrivalEstimated)
-				$("#fltArrivalTimeAuto").show();
-			else
-				$("#fltArrivalTimeAuto").hide();
-
-			if (data.isDepartureEstimated)
-				$("#fltDepartureTimeAuto").show();
-			else
-				$("#fltDepartureTimeAuto").hide();
 
 			if (data.sessionUser) {
 				$("#fltBtnsLoggedOut").hide();
@@ -173,6 +174,7 @@ function getFlight(id) {
 				$("#btnFltConfirmPrebook").hide();
 				$("#btnFltBriefing").hide();
 				$("#btnFltSendEmail").hide();
+				$("#btnFltPrint").hide();
 
 				$("#btnFltBook").click(function () {
 					$("#fltBtnsDefault").hide();
@@ -225,10 +227,17 @@ function getFlight(id) {
 						$("#btnFltSendEmail").attr("onclick", "sendEmailFlight(" + id + ")")
 							.show();
 					}
+
+					if (data.sessionUser.vid == data.bookedByUser.vid) {
+						$("#btnFltPrint").show();
+					} else {
+						$("#btnFltPrint").hide();
+					}
 				}
 				else {
 					$("#btnFltFree").hide();
 					$("#btnFltConfirmPrebook").hide();
+					$("#btnFltPrint").hide();
 				}
 			}
 
@@ -289,7 +298,7 @@ function getFlight(id) {
 				sbUrl += "&depm=" + depMoment.format("mm");
 			}
 			$("#btnSimbrief").attr("href", sbUrl);
-
+			
 			$("#flight").modal("show");
 		}
 	});

@@ -88,7 +88,11 @@ Menu::addItems([
 	<link rel="stylesheet" href="js/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
 	<link rel="stylesheet" href="js/node_modules/leaflet/dist/leaflet.css">
 	<link rel="stylesheet" href="js/node_modules/tempusdominus-bootstrap-4/build/css/tempusdominus-bootstrap-4.min.css">
-	<link rel="stylesheet" href="css/style.css?v=3">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+	<?=Pages::GetStyles()?>
 	<?=Session::GetXsrfToken("js")?>
 </head>
 

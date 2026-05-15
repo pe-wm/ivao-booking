@@ -12,7 +12,7 @@ $prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";
 ?>
 
 <div class="modal fade" id="flight" tabindex="-1" role="dialog" data-prebook-mode="<?=($prebookMode ? 'true' : 'false')?>">
-	<div class="modal-dialog modal-lg" role="document">
+	<div class="modal-dialog modal-xl" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<div class="btn-group btn-group-sm mr-2" role="toolbar" id="fltBtnsAdmin">
@@ -32,55 +32,90 @@ $prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";
 				</div>
 				<div class="details">
 					<div class="alert alert-primary" id="fltInfobox"></div>
-					<div class="flighttiles">
-						<div class="row">
-							<div class="col-lg-4">
-								<div class="head">Flight</div>
-								<div id="fltRadioCallsign" class="big text-center"></div>
-								<div id="fltRadioCallsignHuman" class="foot text-center"></div>
+					<div class="boarding-pass" id="fltBoardingPass">
+						<div class="pass-main">
+							<div class="pass-header">
+								<div class="pass-logo" id="fltPassLogo"></div>
+								<div class="pass-title">BOARDING PASS</div>
 							</div>
-							<div class="col-lg-4">
-								<div class="head">Origin</div>
-								<div id="fltOriginIcao" class="big text-center"></div>
-								<div id="fltOriginHuman" class="foot text-center"></div>
+							<div class="pass-body">
+								<div class="pass-info-row">
+									<div class="pass-info-group flex-2">
+										<div class="pass-label">FLIGHT</div>
+										<div class="pass-value" id="fltPassCallsign"></div>
+										<div class="text-muted small" id="fltPassCallsignHuman"></div>
+									</div>
+									<div class="pass-info-group flex-3">
+										<div class="pass-label">FROM / TO</div>
+										<div class="pass-value"><span id="fltPassOriginIcao"></span> <i class="fas fa-arrow-right mx-1 small text-muted"></i> <span id="fltPassDestinationIcao"></span></div>
+										<div class="text-muted small"><span id="fltPassOriginHuman"></span> / <span id="fltPassDestinationHuman"></span></div>
+									</div>
+									<div class="pass-info-group flex-3">
+										<div class="pass-label">PASSENGER</div>
+										<div class="pass-value" id="fltPassPassengerName">AVAILABLE</div>
+									</div>
+								</div>
+								<div class="pass-info-row mt-4">
+									<div class="pass-info-group">
+										<div class="pass-label">AIRCRAFT</div>
+										<div class="pass-value" id="fltPassAircraftIcao"></div>
+									</div>
+									<div class="pass-info-group">
+										<div class="pass-label">DEPARTURE (Z)</div>
+										<div class="pass-value" id="fltPassDepartureTime"></div>
+									</div>
+									<div class="pass-info-group">
+										<div class="pass-label">ARRIVAL (Z)</div>
+										<div class="pass-value" id="fltPassArrivalTime"></div>
+									</div>
+									<div class="pass-info-group">
+										<div class="pass-label">POSITION</div>
+										<div class="pass-value" id="fltPassPosition"></div>
+									</div>
+								</div>
 							</div>
-							<div class="col-lg-4">
-								<div class="head">Destination</div>
-								<div id="fltDestinationIcao" class="big text-center"></div>
-								<div id="fltDestinationHuman" class="foot text-center"></div>
+							<div class="pass-footer">
+								<div class="pass-qr-group">
+									<img id="fltPassQr" class="pass-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://book.pe.ivao.aero/mybookings" alt="QR Code">
+									<div class="pass-event-name"><?= $config["event_name"] ?></div>
+								</div>
+								<div class="pass-airline-name" id="fltPassAirlineName"></div>
 							</div>
 						</div>
-						<div class="row">
-							<div class="col-lg-4">
-								<div class="head">Aircraft</div>
-								<div id="fltAircraftIcao" class="big text-center"></div>
-								<div id="fltAircraftHuman" class="foot text-center"></div>
+						<div class="pass-stub">
+							<div class="pass-header">
+								<div class="pass-title">STUB</div>
 							</div>
-							<div class="col-lg-4">
-								<div class="head">Departure time</div>
-								<div id="fltDepartureTimeHuman" class="big text-center"></div>
-								<div id="fltDepartureTimeAuto" class="foot text-center"><span class="badge badge-danger">Automatically calculated</span></div>
+							<div class="pass-stub-content">
+								<div class="pass-label">FLIGHT</div>
+								<div class="pass-value" id="fltStubCallsign"></div>
+								
+								<div class="pass-label mt-3">PASSENGER</div>
+								<div class="pass-value text-truncate" style="max-width: 120px;" id="fltStubPassengerName">AVAILABLE</div>
+								
+								<div class="pass-info-row mt-3">
+									<div class="pass-info-group">
+										<div class="pass-label">DEPARTURE</div>
+										<div class="pass-value" id="fltStubDepartureTime"></div>
+									</div>
+								</div>
 							</div>
-							<div class="col-lg-4">
-								<div class="head">Arrival time</div>
-								<div id="fltArrivalTimeHuman" class="big text-center"></div>
-								<div id="fltArrivalTimeAuto" class="foot text-center"><span class="badge badge-danger">Automatically calculated</span></div>
-							</div>
-						</div>
-						<div class="row">
-							<div class="col-lg-4">
-								<div class="head">Position</div>
-								<div id="fltPosition" class="big text-center"></div>
-							</div>
-							<div class="col-lg-8">
-								<div class="head">Route <span id="fltGcd"></span></div>
-								<div id="fltRoute" style="font-family: Consolas, 'Ubuntu Mono', 'Courier New', courier"></div>
-								<p class="mt-2">
-									<a href="https://www.simbrief.com/system/dispatch.php" target="_blank" class="btn btn-secondary btn-sm" id="btnSimbrief">SimBrief</a>									
-								</p>
+							<div class="pass-footer" style="border:none; padding:0; margin:0">
+								<img id="fltStubQr" class="pass-qr-small" src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://book.pe.ivao.aero/mybookings" alt="QR Code">
 							</div>
 						</div>
 					</div>
+
+					<div class="row mt-3">
+						<div class="col-lg-12">
+							<div class="head">Route <span id="fltGcd"></span></div>
+							<p class="mt-2">
+								<a href="https://www.simbrief.com/system/dispatch.php" target="_blank" class="btn btn-secondary btn-sm" id="btnSimbrief">SimBrief</a>									
+								<button type="button" class="btn btn-info btn-sm" id="btnFltPrint" style="display:none"><i class="fas fa-print"></i> Print Boarding Pass</button>
+							</p>
+						</div>
+					</div>
+
 
 					<div class="flightCollapses" id="flightCollapses">
 						<button class="btn btn-block btn-light collapsed" data-target="#fltMap" data-toggle="collapse">Show route on map</button>

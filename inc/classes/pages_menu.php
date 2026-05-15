@@ -118,8 +118,10 @@ class Content
 class Pages
 {
 	private static $scripts = [];
+	private static $styles = ["css/style.css"];
 	private static $pages = [];
 	private static $js;
+	private static $version = 59;
 
 	public static function Add($href)
 	{
@@ -143,6 +145,12 @@ class Pages
 			Pages::$scripts[] = "js/" . $href . ".js";
 	}
 
+	public static function AddCSS($href)
+	{
+		if (file_exists("css/" . $href . ".css"))
+			Pages::$styles[] = "css/" . $href . ".css";
+	}
+
 	public static function AddJSinline($js)
 	{
 		Pages::$js .= $js;
@@ -158,12 +166,25 @@ class Pages
 	{
 		$result = "";
 		foreach (self::$scripts as $script)
-            echo '<script type="text/javascript" src="' . $script . '?v=45"></script>';
+            $result .= '<script type="text/javascript" src="' . $script . '?v=' . self::$version . '"></script>';
 
 		if (!empty(Pages::$js))
 			$result .= '<script>' . Pages::$js . '</script>';
 			
 		return $result;
+	}
+
+	public static function GetStyles()
+	{
+		$result = "";
+		foreach (self::$styles as $style)
+            $result .= '<link rel="stylesheet" href="' . $style . '?v=' . self::$version . '">';
+		return $result;
+	}
+
+	public static function GetVersion()
+	{
+		return self::$version;
 	}
 }
 
