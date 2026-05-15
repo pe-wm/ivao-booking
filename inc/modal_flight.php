@@ -76,7 +76,7 @@ $prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";
 							</div>
 							<div class="pass-footer">
 								<div class="pass-qr-group">
-									<img id="fltPassQr" class="pass-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://book.pe.ivao.aero/mybookings" alt="QR Code">
+									<img id="fltPassQr" class="pass-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<?= urlencode($config["url"] . "/mybookings") ?>" alt="QR Code">
 									<div class="pass-event-name"><?= $config["event_name"] ?></div>
 								</div>
 								<div class="pass-airline-name" id="fltPassAirlineName"></div>
@@ -101,7 +101,7 @@ $prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";
 								</div>
 							</div>
 							<div class="pass-footer" style="border:none; padding:0; margin:0">
-								<img id="fltStubQr" class="pass-qr-small" src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=https://book.pe.ivao.aero/mybookings" alt="QR Code">
+								<img id="fltStubQr" class="pass-qr-small" src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=<?= urlencode($config["url"] . "/mybookings") ?>" alt="QR Code">
 							</div>
 						</div>
 					</div>
