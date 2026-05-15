@@ -146,6 +146,51 @@ class Flight
 		return null;
 	}
 
+	public static function ExportCSV($bookedOnly = false)
+	{
+		global $db;
+		if (Session::LoggedIn() && Session::User()->permission > 1) {
+			$output = "Flight Number,Callsign,Origin,Destination,Departure,Arrival,Aircraft,Freighter,Terminal,Gate,Route,Status,Booked By,Booked At\n";
+			$where = $bookedOnly ? " WHERE booked > 0" : "";
+			$sql = "SELECT * FROM flights" . $where . " ORDER BY departure_time, flight_number";
+			if ($query = $db->GetSQL()->query($sql)) {
+				while ($row = $query->fetch_assoc()) {
+					$status = 'free';
+					if ($row['booked'] == 1) $status = 'prebooked';
+					elseif ($row['booked'] == 2) $status = 'booked';
+					
+					$freighter = $row['aircraft_freighter'] == 1 ? 'Y' : 'N';
+					
+					$line = [
+						$row['flight_number'],
+						$row['callsign'],
+						$row['origin_icao'],
+						$row['destination_icao'],
+						$row['departure_time'],
+						$row['arrival_time'],
+						$row['aircraft_icao'],
+						$freighter,
+						$row['terminal'],
+						$row['gate'],
+						$row['route'],
+						$status,
+						$row['booked_by'],
+						$row['booked_at']
+					];
+					
+					// Escape quotes and wrap in quotes
+					foreach ($line as &$field) {
+						$field = '"' . str_replace('"', '""', $field) . '"';
+					}
+					
+					$output .= implode(",", $line) . "\n";
+				}
+			}
+			return $output;
+		}
+		return null;
+	}
+
 	public static function ClearDatabase()
 	{
 		global $db;

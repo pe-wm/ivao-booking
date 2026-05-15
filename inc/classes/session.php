@@ -518,6 +518,10 @@ class Session
 				if ($action == "exportFlights") {
 					echo json_encode(["error" => 0, "data" => Flight::ExportDatabase()]);
 				}
+				if ($action == "exportFlightsCSV") {
+					$bookedOnly = isset($requestArray["booked_only"]) ? $requestArray["booked_only"] == "true" : false;
+					echo json_encode(["error" => 0, "data" => Flight::ExportCSV($bookedOnly)]);
+				}
 				if ($action == "clearFlights") {
 					echo json_encode(["error" => Flight::ClearDatabase()]);
 				}

@@ -572,8 +572,10 @@ foreach ($flts as $flt)
 					<div class="card mb-4">
 						<h5 class="card-header">Export flights</h5>
 						<div class="card-body">
-							<p class="card-text">Export all flights from the database into a JSON file.</p>
+							<p class="card-text">Export flights from the database into a JSON or CSV file.</p>
 							<button class="btn btn-primary" onclick="adminExportFlights()">Export to JSON</button>
+							<button class="btn btn-info" onclick="adminExportFlightsCSV(false)">Export ALL to CSV</button>
+							<button class="btn btn-secondary" onclick="adminExportFlightsCSV(true)">Export BOOKED only to CSV</button>
 						</div>
 					</div>
 					
