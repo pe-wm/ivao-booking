@@ -576,6 +576,7 @@ foreach ($flts as $flt)
 							<button class="btn btn-primary" onclick="adminExportFlights()">Export to JSON</button>
 							<button class="btn btn-info" onclick="adminExportFlightsCSV(false)">Export ALL to CSV</button>
 							<button class="btn btn-secondary" onclick="adminExportFlightsCSV(true)">Export BOOKED only to CSV</button>
+							<button class="btn btn-dark" onclick="adminExportEventFlightsCSV()">Export EVENT flights to CSV</button>
 						</div>
 					</div>
 					

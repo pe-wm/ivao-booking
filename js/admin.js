@@ -835,6 +835,31 @@ function adminExportFlightsCSV(bookedOnly) {
 	});
 }
 
+function adminExportEventFlightsCSV() {
+	$.ajax({
+		cache: false,
+		type: "POST",
+		url: "json",
+		data: { "type": "admin", "action": "exportEventFlightsCSV" },
+		success: function (data) {
+			if (data && data.error == 0 && data.data) {
+				var dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(data.data);
+				var downloadAnchorNode = document.createElement('a');
+				downloadAnchorNode.setAttribute("href", dataStr);
+				downloadAnchorNode.setAttribute("download", "event_flights_export.csv");
+				document.body.appendChild(downloadAnchorNode);
+				downloadAnchorNode.click();
+				downloadAnchorNode.remove();
+			} else {
+				toast({
+					title: "Error exporting event flights to CSV.",
+					type: "error",
+				});
+			}
+		}
+	});
+}
+
 function adminClearFlights() {
 	swal2({
 		title: "Are you sure?",

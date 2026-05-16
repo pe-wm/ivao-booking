@@ -191,6 +191,34 @@ class Flight
 		return null;
 	}
 
+	public static function ExportEventFlightsCSV()
+	{
+		if (Session::LoggedIn() && Session::User()->permission > 1) {
+			$output = "VID,Callsign,Departure time (UTC),Arrival time (UTC),Departure airport,Arrival airport\n";
+			foreach (Flight::GetAll() as $flt) {
+				if ($flt->booked !== "free") {
+					$line = [
+						$flt->bookedBy,
+						$flt->callsign,
+						$flt->departureTime,
+						$flt->arrivalTime,
+						$flt->originIcao,
+						$flt->destinationIcao
+					];
+					
+					// Escape quotes and wrap in quotes
+					foreach ($line as &$field) {
+						$field = '"' . str_replace('"', '""', $field) . '"';
+					}
+					
+					$output .= implode(",", $line) . "\n";
+				}
+			}
+			return $output;
+		}
+		return null;
+	}
+
 	public static function ClearDatabase()
 	{
 		global $db;
