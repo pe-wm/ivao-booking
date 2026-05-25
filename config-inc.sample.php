@@ -63,3 +63,4 @@ $config["mail_smtp_password"] = 'ITSYOURPASSWORD';
  */
 $config["ivao_client_id"]     = 'YOUR_IVAO_CLIENT_ID';
 $config["ivao_client_secret"] = 'YOUR_IVAO_CLIENT_SECRET';
+$config["ivao_api_key"]      = ''; // optional API key for tracker calls, can be used instead of client credentials

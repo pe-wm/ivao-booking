@@ -194,16 +194,35 @@ class Flight
 	public static function ExportEventFlightsCSV()
 	{
 		if (Session::LoggedIn() && Session::User()->permission > 1) {
-			$output = "VID,Callsign,Departure time (UTC),Arrival time (UTC),Departure airport,Arrival airport\n";
+			$output = "VID,Callsign,Departure time (UTC),Arrival time (UTC),Departure airport,Arrival airport,Tracker IDs\n";
+			$trackerCache = [];
 			foreach (Flight::GetAll() as $flt) {
 				if ($flt->booked !== "free") {
+					$cacheKey = sprintf("%s|%s|%s|%s|%s",
+						$flt->bookedBy,
+						strtoupper($flt->callsign),
+						strtoupper($flt->originIcao),
+						strtoupper($flt->destinationIcao),
+						$flt->departureTime
+					);
+					if (!isset($trackerCache[$cacheKey])) {
+						$trackerCache[$cacheKey] = self::GetIvaoTrackerIds(
+							$flt->bookedBy,
+							$flt->departureTime,
+							$flt->originIcao,
+							$flt->destinationIcao,
+							$flt->callsign
+						);
+					}
+
 					$line = [
 						$flt->bookedBy,
 						$flt->callsign,
 						$flt->departureTime,
 						$flt->arrivalTime,
 						$flt->originIcao,
-						$flt->destinationIcao
+						$flt->destinationIcao,
+						$trackerCache[$cacheKey]
 					];
 					
 					// Escape quotes and wrap in quotes
@@ -217,6 +236,103 @@ class Flight
 			return $output;
 		}
 		return null;
+	}
+
+	private static function GetIvaoTrackerIds($vid, $departureTime, $originIcao, $destinationIcao, $callsign)
+	{
+		$token = self::GetIvaoTrackerToken();
+		if (empty($token)) {
+			return '';
+		}
+
+		$query = [
+			'userId' => $vid,
+			'departureId' => strtoupper($originIcao),
+			'arrivalId' => strtoupper($destinationIcao),
+			'from' => self::GetIvaoTrackerSearchDateFrom($departureTime),
+			'to' => self::GetIvaoTrackerSearchDateTo($departureTime),
+			'page' => 1,
+			'perPage' => 50
+		];
+
+		$headers = [
+			'Accept: application/json',
+			'Authorization: Bearer ' . $token
+		];
+
+		$result = callApi('GET', 'https://api.ivao.aero/v2/tracker/sessions', $query, $headers);
+		$json = json_decode($result, true);
+		if (!is_array($json)) {
+			return '';
+		}
+
+		$ids = [];
+		$sessions = [];
+		if (isset($json['items']) && is_array($json['items'])) {
+			$sessions = $json['items'];
+		} elseif (isset($json['data']) && is_array($json['data'])) {
+			$sessions = $json['data'];
+		} elseif (isset($json['sessions']) && is_array($json['sessions'])) {
+			$sessions = $json['sessions'];
+		} elseif (isset($json[0]) && is_array($json[0])) {
+			$sessions = $json;
+		}
+
+		foreach ($sessions as $session) {
+			if (isset($session['id'])) {
+				$ids[] = $session['id'];
+			}
+		}
+
+		return implode(';', array_unique($ids));
+	}
+
+	private static function GetIvaoTrackerToken()
+	{
+		global $config;
+
+		if (!empty($config['ivao_api_key'])) {
+			return $config['ivao_api_key'];
+		}
+
+		if (empty($config['ivao_client_id']) || empty($config['ivao_client_secret'])) {
+			return null;
+		}
+
+		$openidUrl = 'https://api.ivao.aero/.well-known/openid-configuration';
+		$openidResult = callApi('GET', $openidUrl, false, ['Accept: application/json']);
+		$openidData = @json_decode($openidResult, true);
+		if (!is_array($openidData) || empty($openidData['token_endpoint'])) {
+			return null;
+		}
+
+		$tokenResult = callApi(
+			'POST',
+			$openidData['token_endpoint'],
+			http_build_query([
+				'grant_type' => 'client_credentials',
+				'client_id' => $config['ivao_client_id'],
+				'client_secret' => $config['ivao_client_secret']
+			]),
+			['Content-Type: application/x-www-form-urlencoded', 'Accept: application/json']
+		);
+
+		$tokenJson = json_decode($tokenResult, true);
+		return is_array($tokenJson) && !empty($tokenJson['access_token']) ? $tokenJson['access_token'] : null;
+	}
+
+	private static function GetIvaoTrackerSearchDateFrom($departureTime)
+	{
+		$dt = new DateTime($departureTime, new DateTimeZone('UTC'));
+		$dt->setTime(0, 0, 0);
+		return $dt->format('Y-m-d\TH:i:s\Z');
+	}
+
+	private static function GetIvaoTrackerSearchDateTo($departureTime)
+	{
+		$dt = new DateTime($departureTime, new DateTimeZone('UTC'));
+		$dt->setTime(23, 59, 59);
+		return $dt->format('Y-m-d\TH:i:s\Z');
 	}
 
 	public static function ClearDatabase()

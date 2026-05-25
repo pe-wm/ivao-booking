@@ -90,9 +90,10 @@ function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo
  * @param string method POST, PUT, GET
  * @param string url
  * @param mixed data
+ * @param array headers Optional HTTP headers
  * @return mixed
  */
-function callApi($method, $url, $data = false)
+function callApi($method, $url, $data = false, $headers = [])
 {
 	$curl = curl_init();
 
@@ -114,6 +115,8 @@ function callApi($method, $url, $data = false)
 	curl_setopt($curl, CURLOPT_URL, $url);
 	curl_setopt($curl, CURLOPT_USERAGENT, 'curl/' . curl_version()["version"] . '/donatmarko/ivao-booking');
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	if (!empty($headers))
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 	$result = curl_exec($curl);
 	curl_close($curl);
 

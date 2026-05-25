@@ -836,6 +836,14 @@ function adminExportFlightsCSV(bookedOnly) {
 }
 
 function adminExportEventFlightsCSV() {
+	toast({
+		title: "Searching IVAO trackers for event flights...",
+		type: "info",
+		text: "This may take a few seconds while tracker IDs are collected.",
+		position: 'top-center',
+		timer: 10000,
+	});
+
 	$.ajax({
 		cache: false,
 		type: "POST",

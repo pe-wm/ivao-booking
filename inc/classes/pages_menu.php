@@ -121,7 +121,7 @@ class Pages
 	private static $styles = ["css/style.css"];
 	private static $pages = [];
 	private static $js;
-	private static $version = 62;
+	private static $version = 65; // increment this to force browsers to update the cached JS and CSS files
 
 	public static function Add($href)
 	{
