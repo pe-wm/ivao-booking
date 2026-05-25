@@ -200,7 +200,7 @@ function getSlot(id)
 				}
 			}
 
-			$("#slotAircraftIcao").html(data.aircraftIcao);
+			$("#slotAircraftIcao").html(data.aircraftIcao + (data.aircraftFreighter ? "/F" : ""));
 			$("#slotAircraftHuman").html(data.aircraftName);
 			$("#slotPosition").html(data.position);
 			$("#slotRoute").html(data.route);
@@ -326,6 +326,25 @@ function getSlot(id)
 				$("#slotTafDestination").html("TAF " + data.destinationIcao)
 					.attr("onclick", "getWx('#slotWxResult', '" + data.wxUrl + "?icao=" + data.destinationIcao + "&type=taf')");
 				$("#lnkSlotIvaoRte").prop("href", "https://www.ivao.aero/db/route/route.asp?start=" + data.originIcao + "&end=" + data.destinationIcao);
+
+				// SimBrief link update
+				var sbUrl = "https://www.simbrief.com/system/dispatch.php";
+				sbUrl += "?callsign=" + encodeURIComponent(data.callsign);
+				sbUrl += "&orig=" + encodeURIComponent(data.originIcao);
+				sbUrl += "&dest=" + encodeURIComponent(data.destinationIcao);
+				sbUrl += "&type=" + encodeURIComponent(data.aircraftIcao);
+				if (data.aircraftFreighter) {
+					sbUrl += "&pax=0";
+				}
+				sbUrl += "&route=" + encodeURIComponent(data.route || "");
+				if (/^[A-Z]{3}[0-9]/i.test(data.callsign)) {
+					var icao_aerolinea = data.callsign.substring(0, 3);
+					sbUrl += "&fltnum=" + encodeURIComponent(data.callsign.substring(3));
+					sbUrl += "&airline=" + encodeURIComponent(icao_aerolinea);
+				} else {
+					sbUrl += "&fltnum=" + encodeURIComponent(data.callsign);
+				}
+				$("#btnSlotSimbrief").attr("href", sbUrl);
 			}
 			else
 				$("#btnSlotBriefing").hide();

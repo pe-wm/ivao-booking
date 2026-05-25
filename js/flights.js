@@ -100,7 +100,7 @@ function getFlight(id) {
 				}
 			}
 
-			$("#fltPassAircraftIcao").html(data.aircraftIcao);
+			$("#fltPassAircraftIcao").html(data.aircraftIcao + (data.aircraftFreighter ? "/F" : "")).attr("title", data.aircraftName || "").tooltip('dispose').tooltip();
 			$("#fltPassPosition").html(data.position);
 			$("#fltRoute").html(data.route);
 			$("#fltPassDepartureTime, #fltStubDepartureTime").html(data.departureTimeHuman);
@@ -286,10 +286,13 @@ function getFlight(id) {
 
 			// SimBrief link update
 			var sbUrl = "https://www.simbrief.com/system/dispatch.php";
-			sbUrl += "?callsign=" + data.callsign;
-			sbUrl += "&orig=" + data.originIcao;
-			sbUrl += "&dest=" + data.destinationIcao;
-			sbUrl += "&type=" + data.aircraftIcao;
+			sbUrl += "?callsign=" + encodeURIComponent(data.callsign);
+			sbUrl += "&orig=" + encodeURIComponent(data.originIcao);
+			sbUrl += "&dest=" + encodeURIComponent(data.destinationIcao);
+			sbUrl += "&type=" + encodeURIComponent(data.aircraftIcao);
+			if (data.aircraftFreighter) {
+				sbUrl += "&pax=0";
+			}
 
 			if (data.departureTime) {
 				var depMoment = moment(data.departureTime);
@@ -297,6 +300,18 @@ function getFlight(id) {
 				sbUrl += "&deph=" + depMoment.format("HH");
 				sbUrl += "&depm=" + depMoment.format("mm");
 			}
+			
+			sbUrl += "&route=" + encodeURIComponent(data.route || "");
+
+			// If callsign starts with a 3-letter airline code followed by a number, parse airline & flight number
+			if (/^[A-Z]{3}[0-9]/i.test(data.callsign)) {
+				var icao_aerolinea = data.callsign.substring(0, 3);
+				sbUrl += "&fltnum=" + encodeURIComponent(data.callsign.substring(3));
+				sbUrl += "&airline=" + encodeURIComponent(icao_aerolinea);
+			} else {
+				sbUrl += "&fltnum=" + encodeURIComponent(data.callsign);
+			}
+
 			$("#btnSimbrief").attr("href", sbUrl);
 			
 			$("#flight").modal("show");

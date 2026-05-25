@@ -89,7 +89,17 @@ class Slot
 		if (Session::LoggedIn())
 		{
 			$u = Session::User();
-			if ($db->GetSQL()->query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, gate, route, booked, booked_by, booked_at) VALUES ('" . $array["timeframe_id"] . "', '" . $array["callsign"] . "', '" . $array["origin_icao"] . "', '" . $array["destination_icao"] . "', '" . $array["aircraft_icao"] . "', " . $array["aircraft_freighter"] . ", 'TBD', '" . $array["route"] . "', 1, " . $u->vid . ", NOW())"))
+			$aircraftFreighter = ($array["aircraft_freighter"] === 'true' || $array["aircraft_freighter"] === true || $array["aircraft_freighter"] == 1) ? 1 : 0;
+			
+			$mysqli = $db->GetSQL();
+			$timeframeId = (int)$array["timeframe_id"];
+			$callsign = $mysqli->real_escape_string($array["callsign"]);
+			$originIcao = $mysqli->real_escape_string($array["origin_icao"]);
+			$destinationIcao = $mysqli->real_escape_string($array["destination_icao"]);
+			$aircraftIcao = $mysqli->real_escape_string($array["aircraft_icao"]);
+			$route = $mysqli->real_escape_string($array["route"]);
+
+			if ($mysqli->query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, gate, route, booked, booked_by, booked_at) VALUES ($timeframeId, '$callsign', '$originIcao', '$destinationIcao', '$aircraftIcao', $aircraftFreighter, 'TBD', '$route', 1, " . $u->vid . ", NOW())"))
 			{
 				if (!empty($u->email))
 				{
@@ -468,12 +478,27 @@ class Slot
 				return $this->Delete();
 			else
 			{
-				if ($array["booked_by"] == $this->bookedBy)
-					$sql = "UPDATE slots SET timeframe_id=" . $array["timeframe_id"] . ", callsign='" . $array["callsign"] . "', origin_icao='" . $array["origin_icao"] . "', destination_icao='" . $array["destination_icao"] . "', aircraft_icao='" . $array["aircraft_icao"] . "', aircraft_freighter=" . $array["aircraft_freighter"] . ", terminal='" . $array["terminal"] . "', gate='" . $array["gate"] . "', route='" . $array["route"] . "', booked=" . $array["booked"] . " WHERE id=" . $array["id"];
-				else
-					$sql = "UPDATE slots SET timeframe_id=" . $array["timeframe_id"] . ", callsign='" . $array["callsign"] . "', origin_icao='" . $array["origin_icao"] . "', destination_icao='" . $array["destination_icao"] . "', aircraft_icao='" . $array["aircraft_icao"] . "', aircraft_freighter=" . $array["aircraft_freighter"] . ", terminal='" . $array["terminal"] . "', gate='" . $array["gate"] . "', route='" . $array["route"] . "', booked=" . $array["booked"] . ", booked_by=" . $array["booked_by"] . ", booked_at=NOW() WHERE id=" . $array["id"];
+				$aircraftFreighter = ($array["aircraft_freighter"] === 'true' || $array["aircraft_freighter"] === true || $array["aircraft_freighter"] == 1) ? 1 : 0;
 				
-				if ($db->GetSQL()->query($sql))
+				$mysqli = $db->GetSQL();
+				$timeframeId = (int)$array["timeframe_id"];
+				$callsign = $mysqli->real_escape_string($array["callsign"]);
+				$originIcao = $mysqli->real_escape_string($array["origin_icao"]);
+				$destinationIcao = $mysqli->real_escape_string($array["destination_icao"]);
+				$aircraftIcao = $mysqli->real_escape_string($array["aircraft_icao"]);
+				$terminal = $mysqli->real_escape_string($array["terminal"]);
+				$gate = $mysqli->real_escape_string($array["gate"]);
+				$route = $mysqli->real_escape_string($array["route"]);
+				$booked = (int)$array["booked"];
+				$bookedBy = (int)$array["booked_by"];
+				$id = (int)$array["id"];
+
+				if ($array["booked_by"] == $this->bookedBy)
+					$sql = "UPDATE slots SET timeframe_id=$timeframeId, callsign='$callsign', origin_icao='$originIcao', destination_icao='$destinationIcao', aircraft_icao='$aircraftIcao', aircraft_freighter=$aircraftFreighter, terminal='$terminal', gate='$gate', route='$route', booked=$booked WHERE id=$id";
+				else
+					$sql = "UPDATE slots SET timeframe_id=$timeframeId, callsign='$callsign', origin_icao='$originIcao', destination_icao='$destinationIcao', aircraft_icao='$aircraftIcao', aircraft_freighter=$aircraftFreighter, terminal='$terminal', gate='$gate', route='$route', booked=$booked, booked_by=$bookedBy, booked_at=NOW() WHERE id=$id";
+				
+				if ($mysqli->query($sql))
 					return 0;
 			}
 		}

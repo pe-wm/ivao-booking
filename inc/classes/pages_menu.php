@@ -121,7 +121,7 @@ class Pages
 	private static $styles = ["css/style.css"];
 	private static $pages = [];
 	private static $js;
-	private static $version = 60;
+	private static $version = 62;
 
 	public static function Add($href)
 	{

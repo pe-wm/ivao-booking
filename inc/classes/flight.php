@@ -116,7 +116,7 @@ class Flight
 			$terminal = $mysqli->real_escape_string($array["terminal"]);
 			$gate = $mysqli->real_escape_string($array["gate"]);
 			$route = $mysqli->real_escape_string($array["route"]);
-			$aircraftFreighter = (int)$array["aircraft_freighter"];
+			$aircraftFreighter = ($array["aircraft_freighter"] === 'true' || $array["aircraft_freighter"] === true || $array["aircraft_freighter"] == 1) ? 1 : 0;
 			$booked = (int)$array["booked"];
 			$bookedBy = (int)$array["booked_by"];
 
@@ -966,7 +966,7 @@ class Flight
 			$terminal = $mysqli->real_escape_string($array["terminal"]);
 			$gate = $mysqli->real_escape_string($array["gate"]);
 			$route = $mysqli->real_escape_string($array["route"]);
-			$aircraftFreighter = (int)$array["aircraft_freighter"];
+			$aircraftFreighter = ($array["aircraft_freighter"] === 'true' || $array["aircraft_freighter"] === true || $array["aircraft_freighter"] == 1) ? 1 : 0;
 			$booked = (int)$array["booked"];
 			$bookedBy = (int)$array["booked_by"];
 			$id = (int)$array["id"];
