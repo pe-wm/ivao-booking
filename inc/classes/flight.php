@@ -280,7 +280,7 @@ class Flight
 
 		foreach ($sessions as $session) {
 			if (isset($session['id'])) {
-				$ids[] = $session['id'];
+				$ids[] = 'https://tracker.ivao.aero/sessions/' . $session['id'];
 			}
 		}
 
