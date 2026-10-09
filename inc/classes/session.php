@@ -199,6 +199,9 @@ class Session
 
 	private static function JsonizeFlightResponse($error)
 	{
+		if (is_array($error))
+			return json_encode($error);
+
 		$response = ["error" => $error];
 		if ($error !== 0 && Session::LoggedIn() && Session::User()->permission > 1)
 		{
@@ -295,11 +298,12 @@ class Session
 								// prebooking flight
 								case "book":
 									global $config;
+									$confirmConflicts = !empty($requestArray["confirm_conflicts"]);
 									// Check if prebook mode is enabled in config
 									if (isset($config["prebook"]) && $config["prebook"] == "true")
-										echo self::JsonizeFlightResponse($f->Prebook());
+										echo self::JsonizeFlightResponse($f->Prebook($confirmConflicts));
 									else
-										echo self::JsonizeFlightResponse($f->Reserva());
+										echo self::JsonizeFlightResponse($f->Reserva($confirmConflicts));
 									break;
 								// confirm prebooked flight
 								case "confirm":
@@ -372,7 +376,10 @@ class Session
 			if ($type == "slots")
 			{
 				if ($action == "create")
-					echo json_encode(["error" => Slot::Create($requestArray)]);
+				{
+					$result = Slot::Create($requestArray);
+					echo json_encode(is_array($result) ? $result : ["error" => $result]);
+				}
 				else
 				{
 					$s = Slot::Find($id);

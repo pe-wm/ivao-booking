@@ -319,6 +319,57 @@ class User
 	}
 
 	/**
+	 * Returns this user's reservations that overlap the proposed flight interval.
+	 * A 30-minute boarding/deboarding buffer is applied to both reservations.
+	 * @return array
+	 */
+	public function getReservationConflicts($departureTime, $arrivalTime, $excludeFlightId = null)
+	{
+		$start = strtotime($departureTime);
+		$end = strtotime($arrivalTime);
+		if ($start === false || $end === false || $end <= $start)
+			return [];
+
+		$start -= 1800;
+		$end += 1800;
+		$conflicts = [];
+		$reservations = [];
+
+		foreach ($this->getBookedFlights() as $flight)
+		{
+			if ($flight->id != $excludeFlightId)
+				$reservations[] = ["type" => "flight", "reservation" => $flight];
+		}
+
+		foreach ($this->getSlots() as $slot)
+		{
+			if ($slot->booked == "requested" || $slot->booked == "granted")
+				$reservations[] = ["type" => "slot", "reservation" => $slot];
+		}
+
+		foreach ($reservations as $item)
+		{
+			$reservation = $item["reservation"];
+			$reservationStart = strtotime($reservation->departureTime);
+			$reservationEnd = strtotime($reservation->arrivalTime);
+			if ($reservationStart === false || $reservationEnd === false || $reservationEnd <= $reservationStart)
+				continue;
+
+			if ($start <= $reservationEnd + 1800 && $end >= $reservationStart - 1800)
+			{
+				$conflicts[] = [
+					"type" => $item["type"],
+					"callsign" => $reservation->callsign,
+					"departureTime" => $reservation->departureTime,
+					"arrivalTime" => $reservation->arrivalTime
+				];
+			}
+		}
+
+		return $conflicts;
+	}
+
+	/**
 	 * Convert private slots to JSON.
 	 * Used by admin panel - user mgmnt through AJAX
 	 * @param bool $full = false - full or lite objects

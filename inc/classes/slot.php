@@ -98,13 +98,29 @@ class Slot
 			$destinationIcao = $mysqli->real_escape_string($array["destination_icao"]);
 			$aircraftIcao = $mysqli->real_escape_string($array["aircraft_icao"]);
 			$route = $mysqli->real_escape_string($array["route"]);
+			$slot = new Slot([
+				"id" => 0,
+				"timeframe_id" => $timeframeId,
+				"callsign" => $array["callsign"],
+				"aircraft_icao" => $array["aircraft_icao"],
+				"aircraft_freighter" => $aircraftFreighter,
+				"origin_icao" => $array["origin_icao"],
+				"destination_icao" => $array["destination_icao"],
+				"terminal" => "TBD",
+				"gate" => "TBD",
+				"route" => $array["route"],
+				"booked_at" => date("Y-m-d H:i:s"),
+				"booked_by" => $u->vid,
+				"booked" => 1
+			]);
+			$conflicts = $u->getReservationConflicts($slot->departureTime, $slot->arrivalTime);
+			if ($conflicts && empty($array["confirm_conflicts"]))
+				return ["error" => 2, "conflicts" => $conflicts];
 
 			if ($mysqli->query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, gate, route, booked, booked_by, booked_at) VALUES ($timeframeId, '$callsign', '$originIcao', '$destinationIcao', '$aircraftIcao', $aircraftFreighter, 'TBD', '$route', 1, " . $u->vid . ", NOW())"))
 			{
 				if (!empty($u->email))
 				{
-					$slot = @new Slot($_POST);
-					$slot->bookedBy = $u->vid;
 					$email = $slot->EmailReplaceVars(file_get_contents("contents/slot_request.html"));
 
 					if (Email::Prepare($email, $u->firstname . " " . $u->lastname, $u->email, "Private slot request"))

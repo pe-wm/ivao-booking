@@ -319,14 +319,14 @@ function getFlight(id) {
 	});
 }
 
-function bookFlight(id) {
+function bookFlight(id, confirmConflicts) {
 	var isPrebook = $("#flight").attr("data-prebook-mode") === "true";
 
 	$.ajax({
 		cache: false,
 		type: "POST",
 		url: "json",
-		data: { "type": "flights", "id": id, "action": "book" },
+		data: { "type": "flights", "id": id, "action": "book", "confirm_conflicts": confirmConflicts ? 1 : 0 },
 		success: function (data) {
 			if (data && data.error == 0) {
 				if (isPrebook) {
@@ -357,11 +357,16 @@ function bookFlight(id) {
 			}
 			else if (data && data.error == 2) {
 				swal2({
-					title: "You have an other booked flight in this interval!",
-					html: "If you rather wish to book the present flight, please delete the previous reservation!<br>Conflicting flight(s): " + data.callsigns,
-					type: "error",
-					confirmButtonText: "OK",
-				}).then((value) => { $("#flight").modal("hide"); });
+					title: "Coincidencia de horario",
+					text: reservationConflictSummary(data.conflicts) + "\n\n¿Quieres continuar con esta reserva?",
+					type: "warning",
+					showCancelButton: true,
+					confirmButtonText: "Continuar reserva",
+					cancelButtonText: "Cancelar",
+				}).then((result) => {
+					if (result.value)
+						bookFlight(id, true);
+				});
 			}
 			else
 				notification(data);

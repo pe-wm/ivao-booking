@@ -845,7 +845,7 @@ class Flight
 	 * Generates a token for confirming booking and sends confirmation email
 	 * @return string JSON error code: 0 = no error, 1 = flight is not free, 2 = conflict with other booking, -1 = other error
 	 */
-	public function Prebook()
+	public function Prebook($confirmConflicts = false)
 	{
 		global $db;
 
@@ -855,25 +855,9 @@ class Flight
 			
 			if ($this->booked == "free")
 			{
-				// checking conflicts
-				$bookeds = [];
-				$conflictings = [];
-				foreach ($u->getBookedFlights() as $flt)
-					$bookeds[] = $flt->id;
-				foreach ($this->getConflictingFlights() as $flt)
-					$conflictings[] = $flt->id;
-				
-				$trueConflicts = array_intersect($bookeds, $conflictings);
-				if ($trueConflicts && count($trueConflicts) > 0)
-				{
-					// if the present flight conflicts with one of the booked ones
-					$callsigns = [];
-					foreach ($trueConflicts as $id)
-						$callsigns[] = Flight::Find($id)->callsign;
-
-					echo json_encode(["error" => 2, "callsigns" => implode(", ", $callsigns)]);
-					die();
-				}
+				$conflicts = $u->getReservationConflicts($this->departureTime, $this->arrivalTime, $this->id);
+				if ($conflicts && !$confirmConflicts)
+					return ["error" => 2, "conflicts" => $conflicts];
 				else
 				{
 					$token = md5(uniqid($u->vid . date("Y-m-d H:i:s")));
@@ -902,7 +886,7 @@ class Flight
 		return -1;
 	}
 	
-	public function Reserva()
+	public function Reserva($confirmConflicts = false)
 	{
 		global $db;
 
@@ -912,25 +896,9 @@ class Flight
 			
 			if ($this->booked == "free")
 			{
-				// checking conflicts
-				$bookeds = [];
-				$conflictings = [];
-				foreach ($u->getBookedFlights() as $flt)
-					$bookeds[] = $flt->id;
-				foreach ($this->getConflictingFlights() as $flt)
-					$conflictings[] = $flt->id;
-				
-				$trueConflicts = array_intersect($bookeds, $conflictings);
-				if ($trueConflicts && count($trueConflicts) > 0)
-				{
-					// if the present flight conflicts with one of the booked ones
-					$callsigns = [];
-					foreach ($trueConflicts as $id)
-						$callsigns[] = Flight::Find($id)->callsign;
-
-					echo json_encode(["error" => 2, "callsigns" => implode(", ", $callsigns)]);
-					die();
-				}
+				$conflicts = $u->getReservationConflicts($this->departureTime, $this->arrivalTime, $this->id);
+				if ($conflicts && !$confirmConflicts)
+					return ["error" => 2, "conflicts" => $conflicts];
 				else
 				{
 					$token = md5(uniqid($u->vid . date("Y-m-d H:i:s")));

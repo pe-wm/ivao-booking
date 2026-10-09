@@ -37,6 +37,16 @@ function notification(data)
 	}
 }
 
+function reservationConflictSummary(conflicts)
+{
+	return conflicts.map(function(conflict) {
+		var type = conflict.type == "slot" ? "Slot privado" : "Vuelo";
+		var departure = moment.utc(conflict.departureTime).format("DD MMM HH:mm");
+		var arrival = moment.utc(conflict.arrivalTime).format("DD MMM HH:mm");
+		return type + " " + conflict.callsign + " (" + departure + "Z - " + arrival + "Z)";
+	}).join("\n");
+}
+
 function scroll(elem)
 {
 	elem = $(elem);

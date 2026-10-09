@@ -91,43 +91,71 @@ function closeTimeframe()
 	$("#timeframe").collapse("hide");
 }
 
+function submitSlotRequest(requestData)
+{
+	$.ajax({
+		cache: false,
+		url: "json",
+		type: "POST",
+		data: requestData,
+		success: function(data) {
+			if (data && data.error == 2)
+			{
+				swal2({
+					title: "Coincidencia de horario",
+					text: reservationConflictSummary(data.conflicts) + "\n\n¿Quieres continuar con esta solicitud?",
+					type: "warning",
+					showCancelButton: true,
+					confirmButtonText: "Continuar solicitud",
+					cancelButtonText: "Cancelar",
+				}).then((result) => {
+					if (result.value)
+					{
+						requestData.confirm_conflicts = 1;
+						submitSlotRequest(requestData);
+					}
+				});
+			}
+			else if (data && data.error == 0)
+			{
+				toast({
+					title: "You have successfully sent the slot request!",
+					type: "success"
+				});
+				getTimeframe(requestData.timeframe_id);
+				$("#txtSrCallsign").val(null);
+				$("#txtSrOriginIcao").val(null);
+				$("#txtSrDestinationIcao").val(null);
+				$("#txtSrAircraftIcao").val(null);
+				$("#txtSrRoute").val(null);
+				$("#chkSrFreighter").prop("checked", false);
+			}
+			else
+				notification(data);
+		}
+	});
+}
+
 $("#frmSlotRequest").submit(function(e) {
 	e.preventDefault();
 	var timeframeId = $("#timeframeId").val();
 	var slotIcao = $("#slotIcao").val();
-	var callsign = $("#txtSrCallsign").val().toUpperCase();
 	var originIcao = $("#txtSrOriginIcao").val().toUpperCase();
 	var destinationIcao = $("#txtSrDestinationIcao").val().toUpperCase();
-	var aircraftIcao = $("#txtSrAircraftIcao").val().toUpperCase();
-	var aircraftFreighter = $("#chkSrFreighter").is(":checked");
-	var route = $("#txtSrRoute").val().toUpperCase();
 
 	if ((originIcao == slotIcao && destinationIcao != slotIcao) || (destinationIcao == slotIcao && originIcao != slotIcao))
 	{
-		$.ajax({
-			cache: false,
-			url: "json",
-			type: "POST",
-			data: { "type": "slots", "action": "create", "timeframe_id": timeframeId, "callsign": callsign, "origin_icao": originIcao, "destination_icao": destinationIcao, "aircraft_icao": aircraftIcao, "aircraft_freighter": aircraftFreighter, "route": route },
-			success: function(data) {
-				if (data && data.error == 0)
-				{
-					toast({
-						title: "You have successfully sent the slot request!",
-						type: "success"
-					});
-					getTimeframe(timeframeId);
-					
-					$("#txtSrCallsign").val(null);
-					$("#txtSrOriginIcao").val(null);
-					$("#txtSrDestinationIcao").val(null);
-					$("#txtSrAircraftIcao").val(null);
-					$("#txtSrRoute").val(null);
-					$("#chkSrFreighter").prop("checked", false);
-				}
-				else
-					notification(data);
-			}
+		submitSlotRequest({
+			"type": "slots",
+			"action": "create",
+			"timeframe_id": timeframeId,
+			"callsign": $("#txtSrCallsign").val().toUpperCase(),
+			"origin_icao": originIcao,
+			"destination_icao": destinationIcao,
+			"aircraft_icao": $("#txtSrAircraftIcao").val().toUpperCase(),
+			"aircraft_freighter": $("#chkSrFreighter").is(":checked"),
+			"route": $("#txtSrRoute").val().toUpperCase(),
+			"confirm_conflicts": 0
 		});
 	}
 	else
