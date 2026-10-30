@@ -160,7 +160,7 @@ if (count($apts) > 0)
 		<div class="text-justify">
 			<h3>Instructions for slot bookings</h3>
 
-			<p>If you want to participate in the event, you need to have a reserved slot. Also note that to report the point for the medal you need to have a reserved slot, including several advantages that you will discover in our social networks and forum where you can find all the information about the event (https://forum.ivao.aero/threads/latam-mse.378087/). </p>
+			<p>If you want to participate in the event, you need to have a reserved slot. Also note that to report the point for the medal you need to have a reserved slot, including several advantages that you will discover in our social networks and forum where you can find all the information about the event. </p>
 			<p>Requesting a slot does not mean it is yours instantly. Our Events staff will review and evaluate your application. To know the result, you will have to check it on the website as "Granted to [Your VID]", in case it is not possible we will contact you.</p>
 			<p>To request a slot, click on the button next to the desired time slot. Please note that we can announce more than one possible slot for the same time slot. The red button means that the time slot is full, no more requests can be submitted.</p>
 

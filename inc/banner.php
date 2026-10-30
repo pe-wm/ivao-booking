@@ -16,16 +16,19 @@
 <?php endif; ?>
 
 	<section class="hero">
-		<div class="hero-pill"><?=htmlspecialchars($config["division_name"] ?? "")?></div>
-		<h1><span><?=htmlspecialchars($config["event_name"] ?? "")?></span></h1>
-		<p class="lead">Book your flight, request a private slot and join the event.</p>
-		<div class="hero-actions">
-			<a class="btn btn-primary" href="flights"><i class="fas fa-plane"></i> Flight booking</a>
-			<a class="btn btn-secondary" href="briefing">Briefing</a>
+		<div class="hero-copy">
+			<div class="hero-pill"><?=htmlspecialchars($config["division_name"] ?? "")?></div>
+			<h1><span><?=htmlspecialchars($config["event_name"] ?? "")?></span></h1>
+			<p class="lead">Book your flight, request a private slot and join the event.</p>
+			<div class="hero-actions">
+				<a class="btn btn-primary" href="flights"><i class="fas fa-plane"></i> Flight booking</a>
+				<a class="btn btn-secondary" href="briefing">Briefing</a>
+			</div>
+			<div class="hero-stats">
+				<div class="hero-stat"><strong id="heroClock">--:--:-- UTC</strong><small>Zulu time</small></div>
+			</div>
 		</div>
-		<div class="hero-stats">
-			<div class="hero-stat"><strong id="heroClock">--:--:-- UTC</strong><small>Zulu time</small></div>
-		</div>
+		<img src="https://pe.ivao.aero/wordpress/wp-content/uploads/ivao/events/2025/LATAM_MSE_2025.png" alt="LATAM MSE 2025" class="hero-image">
 	</section>
 
 	<div class="banner-content">
