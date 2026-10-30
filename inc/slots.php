@@ -11,6 +11,9 @@ global $config;
 
 function slotsTable($airport)
 {
+	global $config;
+	$eventMode = (int)($config["mode"] ?? 0);
+	$eventIsOpen = $eventMode === 1;
 	$result = '<div class="table-responsive">
 		<table class="table table-hover table-sm table-striped">
 			<thead>
@@ -34,7 +37,9 @@ function slotsTable($airport)
 			$result .= '	<td>' . getHumanDateTime($tf->time) . '</td>';
 
 			$stats = $tf->getStatistics();
-			if ($stats["free"] > 0)
+			if (!$eventIsOpen)
+				$result .= '<td><span class="text-muted">' . ($eventMode === 2 ? 'Event closed' : 'Not open yet') . '</span></td>';
+			elseif ($stats["free"] > 0)
 				$result .= '	<td><button class="btn btn-sm btn-success btn-block" onclick="getTimeframe(' . $tf->id . ')"><i class="fas fa-gavel"></i> Request now!</button></td>';	
 			else
 				$result .= '	<td><button class="btn btn-sm btn-danger btn-block" onclick="getTimeframe(' . $tf->id . ')"><i class="fas fa-times"></i> Not available</button></td>';	
@@ -74,7 +79,7 @@ if (count($apts) > 0)
 	echo '</div>';
 ?>
 	<div class="col-lg-8">
-		<div class="collapse" id="timeframe">
+		<div class="collapse" id="timeframe" data-event-mode="<?=(int)($config["mode"] ?? 0)?>">
 			<div class="card" style="margin-bottom: 2rem">
 				<h5 class="card-header"><span id="timeframeTitle"></span>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeTimeframe()">
@@ -99,7 +104,7 @@ if (count($apts) > 0)
 						</table>
 					</div>
 
-<?php if (Session::LoggedIn()) : ?>
+<?php if (Session::LoggedIn() && (int)($config["mode"] ?? 0) === 1) : ?>
 					<div class="card card-body" id="slotRequest">
 						<h5>Request a slot</h5>
 						<form id="frmSlotRequest">

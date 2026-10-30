@@ -85,9 +85,12 @@ class Slot
 	 */
 	public static function Create($array)
 	{
-		global $db;
+		global $db, $config;
 		if (Session::LoggedIn())
 		{
+			if ((int)($config["mode"] ?? 0) !== 1)
+				return ["error" => 403, "message" => "Slot requests are unavailable while the event is not open."];
+
 			$u = Session::User();
 			$aircraftFreighter = ($array["aircraft_freighter"] === 'true' || $array["aircraft_freighter"] === true || $array["aircraft_freighter"] == 1) ? 1 : 0;
 			

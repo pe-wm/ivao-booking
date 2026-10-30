@@ -298,16 +298,24 @@ class Session
 								// prebooking flight
 								case "book":
 									global $config;
-									$confirmConflicts = !empty($requestArray["confirm_conflicts"]);
-									// Check if prebook mode is enabled in config
-									if (isset($config["prebook"]) && $config["prebook"] == "true")
-										echo self::JsonizeFlightResponse($f->Prebook($confirmConflicts));
+									if ((int)($config["mode"] ?? 0) !== 1)
+										echo self::JsonizeFlightResponse(["error" => 403, "message" => "Flight booking is unavailable while the event is not open."]);
 									else
-										echo self::JsonizeFlightResponse($f->Reserva($confirmConflicts));
+									{
+										$confirmConflicts = !empty($requestArray["confirm_conflicts"]);
+										// Check if prebook mode is enabled in config
+										if (isset($config["prebook"]) && $config["prebook"] == "true")
+											echo self::JsonizeFlightResponse($f->Prebook($confirmConflicts));
+										else
+											echo self::JsonizeFlightResponse($f->Reserva($confirmConflicts));
+									}
 									break;
 								// confirm prebooked flight
 								case "confirm":
-									echo self::JsonizeFlightResponse($f->Book());
+									if ((int)($config["mode"] ?? 0) !== 1)
+										echo self::JsonizeFlightResponse(["error" => 403, "message" => "Flight booking is unavailable while the event is not open."]);
+									else
+										echo self::JsonizeFlightResponse($f->Book());
 									break;
 								// delete booking
 								case "free":

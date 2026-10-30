@@ -93,7 +93,8 @@
 				if ($f->booked == "prebooked"){
 					$result .= '<td data-order="1" data-search="prebooked"><button class="btn btn-warning btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Prebooked by <strong>' . $f->bookedBy . '</strong></button></td>';
 				}else{
-					$result .= '<td data-order="1" data-search="prebooked"><button class="btn btn-warning btn-sm btn-block" onclick="return false;"><i class="fas fa-lock"></i> Available soon</button></td>';
+					$availabilityLabel = (int)$config["mode"] === 0 ? 'Available soon' : 'Event closed';
+					$result .= '<td data-order="1" data-search="prebooked"><button class="btn btn-warning btn-sm btn-block" onclick="return false;"><i class="fas fa-lock"></i> ' . $availabilityLabel . '</button></td>';
 				}
 			}else{
 				$prebookMode = isset($config["prebook"]) && $config["prebook"] == "true";

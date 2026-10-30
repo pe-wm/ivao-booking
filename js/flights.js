@@ -403,7 +403,7 @@ function confirmPrebooking(id) {
 					else if (data && data.error == 403) {
 						swal2({
 							title: "You have no access to confirm the booking!",
-							text: "If you are logged in with other VID than the original booker, please log out!",
+							text: data.message || "If you are logged in with other VID than the original booker, please log out!",
 							type: "error",
 							confirmButtonText: "OK",
 						}).then(() => { $("#flight").modal("hide"); });

@@ -54,7 +54,14 @@ function getTimeframe(id)
 				tbl += '<tr><td colspan="5" style="font-style: italic; text-align: center">(no booked slots yet)</td></tr>';			
 			$("#tblSlots tbody").html(tbl);
 
-			if (haveBooking)
+			var eventMode = parseInt($("#timeframe").data("event-mode"), 10);
+			if (eventMode !== 1)
+			{
+				$("#slotRequest").hide();
+				$("#timeframeStatus").prop("class", "alert alert-warning")
+					.text(eventMode === 2 ? "The event is closed; slot requests are unavailable." : "The event is not open yet; slot requests are unavailable.");
+			}
+			else if (haveBooking)
 			{
 				$("#slotRequest").hide();
 				$("#timeframeStatus").prop("class", "alert alert-warning")
