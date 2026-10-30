@@ -19,6 +19,12 @@ define('SQL_DATABASE',     'booking');
 define('SQL_DATABASE_NAV', 'booking_nav');
 
 /**
+ * CARTO Basemaps API key for the route maps (get one at https://carto.com/basemaps/apikey/).
+ * Sent to the browser, so restrict it by domain in the CARTO dashboard.
+ */
+define('CARTO_API_KEY', 'YOUR_CARTO_API_KEY');
+
+/**
  * URL of the booking system (full path).
  * Needed for the IVAO login API and to the emails.
  */

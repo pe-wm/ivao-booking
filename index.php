@@ -92,8 +92,10 @@ Menu::addItems([
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+128&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 	<?=Pages::GetStyles()?>
 	<?=Session::GetXsrfToken("js")?>
+	<script>var CARTO_API_KEY = <?=json_encode(defined('CARTO_API_KEY') ? CARTO_API_KEY : '')?>;</script>
 </head>
 
 <body>

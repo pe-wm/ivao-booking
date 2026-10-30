@@ -180,7 +180,8 @@ function getSlot(id)
 			$("#uiSlotMap").html("<div id='leafletSlotMap' style='width: 100%; height: 100%'></div>");
 			var map = L.map('leafletSlotMap').setView([51.505, -0.09], 13);
 			map.scrollWheelZoom.disable();
-			L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
+			L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=' + encodeURIComponent(CARTO_API_KEY), {
+				subdomains: 'abcd',
 				maxZoom: 18,
  				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
 			}).addTo(map);		

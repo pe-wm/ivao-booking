@@ -118,10 +118,10 @@ class Content
 class Pages
 {
 	private static $scripts = [];
-	private static $styles = ["css/style.css"];
+	private static $styles = ["css/style.css", "css/theme.css"];
 	private static $pages = [];
 	private static $js;
-	private static $version = 65; // increment this to force browsers to update the cached JS and CSS files
+	private static $version = 71; // increment this to force browsers to update the cached JS and CSS files
 
 	public static function Add($href)
 	{
@@ -214,9 +214,9 @@ class Menu
 		global $page;
 				
 		echo '
-		<nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
+		<nav class="navbar navbar-expand-md navbar-dark fixed-top">
 			<div class="container">
-				<a class="navbar-brand" href="' . $config["url"] . '">' . $config["event_name"] . '</a>
+				<a class="navbar-brand" href="' . $config["url"] . '"><span class="brand-mark"><i class="fas fa-plane"></i></span>' . $config["event_name"] . '</a>
 				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>
