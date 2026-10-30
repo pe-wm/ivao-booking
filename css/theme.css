@@ -221,7 +221,8 @@ main.container { padding-top: 1rem; padding-bottom: 1rem; }
 }
 
 /* Banner content (editable HTML) */
-.banner-content > img {
+.banner-content > img,
+img.banner-img {
 	width: 100%;
 	height: auto;
 	border: 1px solid var(--line);
